@@ -1,1 +1,159 @@
-/* Estilos iniciales del plugin DGES Documentos */
+/**
+ * Estilos visuales para el plugin DGES Documentos.
+ * Diseñado con variables y encapsulado para evitar conflictos con el tema de WordPress.
+ */
+.dges-documentos {
+    --dges-blue: #004582;
+    --dges-blue-dark: #003d6e;
+    --dges-blue-light: #f0f6ff;
+    --dges-border: #d6e2f5;
+    --dges-text: #1f2a44;
+    width: 100%;
+    margin: 20px 0;
+    color: var(--dges-text);
+    font-family: "Roboto", sans-serif;
+    box-sizing: border-box;
+}
+
+.dges-documentos *,
+.dges-documentos *::before,
+.dges-documentos *::after {
+    box-sizing: border-box;
+}
+
+.dges-documentos h2 {
+    margin: 0 0 20px;
+    color: var(--dges-blue);
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    line-height: 1.2;
+}
+
+/* Contenedor de filtros */
+.dges-documentos-filters {
+    display: grid;
+    grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
+    gap: 14px;
+    align-items: end;
+    margin: 0 0 18px;
+    padding: 16px;
+    border: 1px solid var(--dges-border);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0, 40, 120, .08);
+}
+
+.dges-documentos-filters label {
+    display: grid;
+    gap: 6px;
+    color: var(--dges-text);
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+.dges-documentos-filters input,
+.dges-documentos-filters select,
+.dges-documentos-filters button {
+    min-height: 42px;
+    width: 100%;
+    border: 1px solid #c7d5e8;
+    border-radius: 4px;
+    padding: 9px 11px;
+    background: #fff;
+    color: var(--dges-text);
+    font: inherit;
+}
+
+.dges-documentos-filters input:focus,
+.dges-documentos-filters select:focus {
+    border-color: var(--dges-blue);
+    outline: 2px solid rgba(0, 69, 130, .18);
+    outline-offset: 1px;
+}
+
+.dges-documentos-filters button {
+    width: auto;
+    min-width: 78px;
+    border-color: #006dcc;
+    background: #006dcc;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color .2s ease;
+}
+
+.dges-documentos-filters button:hover {
+    background: var(--dges-blue-dark);
+}
+
+/* Estado de carga y resultados */
+.dges-documentos-status {
+    min-height: 24px;
+    margin: 0 0 14px;
+    color: #4b5d75;
+    font-size: .95rem;
+}
+
+.dges-documentos-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* Tarjetas de documentos individual */
+.dges-document-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--dges-border);
+    border-radius: 10px;
+    padding: 18px;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0, 40, 120, .08);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.dges-document-card:hover {
+    box-shadow: 0 12px 28px rgba(0, 40, 120, .13);
+    transform: translateY(-2px);
+}
+
+.dges-document-card h3 {
+    margin: 8px 0 10px;
+    color: var(--dges-text);
+    font-size: 1.08rem;
+    line-height: 1.4;
+}
+
+.dges-document-card p {
+    margin: 0 0 10px;
+    color: #4b5563;
+    font-size: .92rem;
+    line-height: 1.55;
+}
+
+.dges-document-type {
+    color: #006dcc;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.dges-document-card a {
+    color: #006dcc;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.dges-document-card a:hover {
+    color: var(--dges-blue-dark);
+    text-decoration: underline;
+}
+
+/* Adaptabilidad para dispositivos móviles */
+@media (max-width: 768px) {
+    .dges-documentos-filters {
+        grid-template-columns: 1fr;
+    }
+}
