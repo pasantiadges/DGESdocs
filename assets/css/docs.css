@@ -1,7 +1,4 @@
-/**
- * Estilos visuales para el plugin DGES Documentos.
- * Diseñado con variables y encapsulado para evitar conflictos con el tema de WordPress.
- */
+/* Componentes visuales DGES. Todos los selectores quedan aislados al plugin. */
 .dges-documentos {
     --dges-blue: #004582;
     --dges-blue-dark: #003d6e;
@@ -28,10 +25,9 @@
     line-height: 1.2;
 }
 
-/* Contenedor de filtros */
 .dges-documentos-filters {
     display: grid;
-    grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(140px, 1fr)) auto;
+    grid-template-columns: minmax(240px, 2fr) repeat(5, minmax(125px, 1fr)) auto;
     gap: 14px;
     align-items: end;
     margin: 0 0 18px;
@@ -64,7 +60,8 @@
 }
 
 .dges-documentos-filters input:focus,
-.dges-documentos-filters select:focus {
+.dges-documentos-filters select:focus,
+.dges-documentos-filters button:focus {
     border-color: var(--dges-blue);
     outline: 2px solid rgba(0, 69, 130, .18);
     outline-offset: 1px;
@@ -78,14 +75,14 @@
     color: #fff;
     cursor: pointer;
     font-weight: 600;
-    transition: background-color .2s ease;
+    transition: background-color .2s ease, border-color .2s ease;
 }
 
 .dges-documentos-filters button:hover {
+    border-color: var(--dges-blue-dark);
     background: var(--dges-blue-dark);
 }
 
-/* Estado de carga y resultados */
 .dges-documentos-status {
     min-height: 24px;
     margin: 0 0 14px;
@@ -99,19 +96,20 @@
     gap: 20px;
 }
 
-/* Tarjetas de documentos individual */
 .dges-document-card {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     border: 1px solid var(--dges-border);
     border-radius: 10px;
     padding: 18px;
     background: #fff;
     box-shadow: 0 10px 25px rgba(0, 40, 120, .08);
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .dges-document-card:hover {
+    border-color: #9bbce2;
     box-shadow: 0 12px 28px rgba(0, 40, 120, .13);
     transform: translateY(-2px);
 }
@@ -130,18 +128,54 @@
     line-height: 1.55;
 }
 
+.dges-document-card .dges-document-meta {
+    color: var(--dges-blue);
+    font-size: .82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
 .dges-document-type {
     color: #006dcc;
     font-size: .75rem;
     font-weight: 700;
-    text-transform: uppercase;
     letter-spacing: .3px;
+    text-transform: uppercase;
+}
+
+.dges-document-card details {
+    margin: 8px 0 14px;
+    border-top: 1px solid #e5edf7;
+    padding-top: 10px;
+}
+
+.dges-document-card summary {
+    color: var(--dges-blue);
+    cursor: pointer;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.dges-document-card details ul {
+    margin: 8px 0 0 18px;
+    padding: 0;
+}
+
+.dges-document-card details li {
+    margin-bottom: 6px;
+    color: #4b5563;
+    font-size: .88rem;
+    line-height: 1.45;
 }
 
 .dges-document-card a {
     color: #006dcc;
     font-weight: 600;
     text-decoration: none;
+}
+
+.dges-document-card > a:last-child {
+    display: inline-block;
     margin-top: auto;
     padding-top: 8px;
 }
@@ -151,9 +185,36 @@
     text-decoration: underline;
 }
 
-/* Adaptabilidad para dispositivos móviles */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .dges-documentos-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dges-documentos-filters label:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 560px) {
+    .dges-documentos {
+        margin: 14px 0;
+    }
+
     .dges-documentos-filters {
         grid-template-columns: 1fr;
+        padding: 12px;
+    }
+
+    .dges-documentos-filters label:first-child {
+        grid-column: auto;
+    }
+
+    .dges-documentos-filters button {
+        width: 100%;
+    }
+
+    .dges-documentos-results {
+        grid-template-columns: 1fr;
+        gap: 14px;
     }
 }

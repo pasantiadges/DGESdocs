@@ -1,23 +1,16 @@
-/**
- * Lógica del frontend para el plugin DGES Documentos.
- * Maneja la carga asíncrona de datos, los filtros dinámicos y la interfaz de usuario.
- */
 (function () {
     'use strict';
 
-    // Función auxiliar para escapar HTML y evitar vulnerabilidades XSS.
     function escapeHtml(value) {
         return String(value || '').replace(/[&<>"']/g, function (char) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char];
         });
     }
 
-    // Capitaliza la primera letra de un texto.
     function label(value) {
         return value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
     }
 
-    // Inicializa el contenedor del plugin en la página.
     function init(root) {
         var filters = root.querySelector('[data-filters]');
         var results = root.querySelector('[data-results]');
@@ -26,7 +19,6 @@
         var searchTimer;
         var allItems = [];
 
-        // Normaliza texto para quitar tildes y facilitar la búsqueda insensible a acentos.
         function normalize(value) {
             return String(value || '')
                 .normalize('NFD')
@@ -37,7 +29,6 @@
                 .trim();
         }
 
-        // Genera el texto indexado para búsquedas dentro del documento y sus relaciones.
         function itemSearchText(item) {
             var related = (item.related || []).map(function (document) {
                 return [document.title, document.description, document.url].join(' ');
@@ -48,9 +39,8 @@
             ].join(' '));
         }
 
-        // Petición AJAX / Fetch a la API REST de WordPress para obtener los documentos.
         function fetchDocuments() {
-            status.textContent = 'Buscando documentos...';
+            status.textContent = 'Buscando…';
             fetch(DGESDocumentos.endpoint, { headers: { 'X-WP-Nonce': DGESDocumentos.nonce } })
                 .then(function (response) {
                     if (!response.ok) throw new Error('No se pudieron cargar los documentos.');
@@ -67,7 +57,6 @@
                 });
         }
 
-        // Aplica los filtros locales sobre el listado de documentos obtenido.
         function applyFilters() {
             var search = normalize(state.search);
             var searchTokens = search ? search.split(' ') : [];
@@ -87,10 +76,9 @@
             status.textContent = items.length + ' documento(s) encontrado(s).';
         }
 
-        // Renderiza los campos de selección y búsqueda en el HTML.
         function renderFilters(facets) {
             filters.innerHTML =
-                '<label>Buscar <input type="search" data-search placeholder="Ej.: Resolución 234-2023"></label>' +
+                '<label>Buscar <input type="search" data-search placeholder="Ej.: Resolución 234-2023 o Memo 001/22"></label>' +
                 '<label>Tipo <select data-type><option value="">Todos</option>' +
                 (facets.types || []).map(function (item) { return '<option value="' + escapeHtml(item) + '">' + escapeHtml(label(item)) + '</option>'; }).join('') +
                 '</select></label>' +
@@ -100,39 +88,63 @@
                 '<label>Año <select data-year><option value="">Todos</option>' +
                 (facets.years || []).map(function (item) { return '<option value="' + item + '">' + item + '</option>'; }).join('') +
                 '</select></label>' +
+                '<label>Tipo documental <select data-document-type><option value="">Todos</option>' +
+                (facets.document_types || []).map(function (item) {
+                    return '<option value="' + escapeHtml(item) + '">' + escapeHtml(label(item)) + '</option>';
+                }).join('') +
+                '</select></label>' +
+                '<label>Número <select data-number><option value="">Todos</option>' +
+                (facets.numbers || []).map(function (item) {
+                    return '<option value="' + escapeHtml(item) + '">' + escapeHtml(item) + '</option>';
+                }).join('') +
+                '</select></label>' +
                 '<button type="button" data-reset>Limpiar</button>';
 
             filters.querySelector('[data-search]').value = state.search;
             filters.querySelector('[data-type]').value = state.type;
             filters.querySelector('[data-category]').value = state.category;
             filters.querySelector('[data-year]').value = state.year;
+            filters.querySelector('[data-document-type]').value = state.document_type;
+            filters.querySelector('[data-number]').value = state.number;
         }
 
-        // Dibuja las tarjetas de resultados en pantalla.
         function renderResults(items) {
             results.innerHTML = items.length ? items.map(function (item) {
                 return '<article class="dges-document-card"><span class="dges-document-type">' +
                     escapeHtml(label(item.type)) + '</span><h3>' + escapeHtml(item.title) +
                     '</h3>' + (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') +
+                    (item.category ? '<p>' + escapeHtml(item.category) + '</p>' : '') +
+                    (item.document_type ? '<p class="dges-document-meta">' +
+                        escapeHtml(label(item.document_type)) +
+                        (item.number ? ' N.º ' + escapeHtml(item.number) : '') +
+                        (item.year ? '/' + escapeHtml(item.year) : '') + '</p>' : '') +
+                    ((item.related || []).length ? '<details><summary>Documentos relacionados (' +
+                        item.related.length + ')</summary><ul>' + item.related.map(function (related) {
+                            return '<li><a href="' + escapeHtml(related.url) + '" target="' +
+                                escapeHtml(related.target) + '" rel="noopener">' + escapeHtml(related.title) +
+                                '</a>' + (related.description ? ' — ' + escapeHtml(related.description) : '') +
+                                '</li>';
+                        }).join('') + '</ul></details>' : '') +
                     '<a href="' + escapeHtml(item.url) + '" target="' + escapeHtml(item.target) +
                     '" rel="noopener">Abrir documento</a></article>';
             }).join('') : '<p>No se encontraron documentos con esos filtros.</p>';
         }
 
-        // Eventos de interacción del usuario con los filtros.
         filters.addEventListener('input', function (event) {
-            if (event.target.matches('[data-search]')) state.search = event.target.value;
+            var field = event.target;
+            if (field.matches('[data-search]')) state.search = field.value;
             clearTimeout(searchTimer);
             searchTimer = setTimeout(applyFilters, 150);
         });
-
         filters.addEventListener('change', function (event) {
-            if (event.target.matches('[data-type]')) state.type = event.target.value;
-            if (event.target.matches('[data-category]')) state.category = event.target.value;
-            if (event.target.matches('[data-year]')) state.year = event.target.value;
+            var field = event.target;
+            if (field.matches('[data-type]')) state.type = field.value;
+            if (field.matches('[data-category]')) state.category = field.value;
+            if (field.matches('[data-year]')) state.year = field.value;
+            if (field.matches('[data-document-type]')) state.document_type = field.value;
+            if (field.matches('[data-number]')) state.number = field.value;
             applyFilters();
         });
-
         filters.addEventListener('click', function (event) {
             if (event.target.matches('[data-reset]')) {
                 state = { search: '', type: '', category: '', year: '', document_type: '', number: '' };
@@ -140,11 +152,9 @@
             }
         });
 
-        // Llamada inicial para cargar los documentos al montar el componente.
         fetchDocuments();
     }
 
-    // Disparador principal cuando el DOM carga por completo.
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-dges-documentos]').forEach(init);
     });

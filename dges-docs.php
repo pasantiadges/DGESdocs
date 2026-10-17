@@ -4,7 +4,7 @@
  * Description: Importa los enlaces de la página de documentos de la DGES y los muestra con búsqueda y filtros avanzados.
  * Version: 1.2.0
  * Author: DGES
- * Text Domain: dges-documentos-filtro
+ * Text Domain: dges-documento
  */
 
 // Seguridad de WordPress: Evita el acceso directo al archivo vía URL.
@@ -23,5 +23,5 @@ require_once DGES_DOCS_DIR . 'includes/class-dges-docs-api.php';
 require_once DGES_DOCS_DIR . 'includes/class-dges-docs-plugin.php';
 
 // Hooks de ciclo de vida de WordPress: activación y carga del plugin.
-register_activation_hook(__FILE__, array('DGES_Documentos_Plugin', 'activate'));
-add_action('plugins_loaded', array('DGES_Documentos_Plugin', 'init'));
+register_activation_hook(__FILE__, array('DGES_Docs_Plugin', 'activate'));
+add_action('plugins_loaded', array('DGES_Docs_Plugin', 'init'));
