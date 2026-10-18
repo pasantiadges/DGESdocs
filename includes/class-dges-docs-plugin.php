@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class DGES_Docs_Plugin {
 
- public static function init() {
-        // Este módulo conecta la interfaz del shortcode con el crawler y la API REST.
+public static function init() {
         add_shortcode('dges_documentos', array(__CLASS__, 'shortcode'));
+        add_shortcode('dges_documentos_destacados', array(__CLASS__, 'shortcode_destacados')); // <--- Nuevo shortcode
         add_action('wp_enqueue_scripts', array(__CLASS__, 'register_assets'));
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
         add_action('admin_init', array(__CLASS__, 'register_settings'));
@@ -45,6 +45,45 @@ class DGES_Docs_Plugin {
             '</h2><div class="dges-documentos-filters" data-filters></div>' .
             '<p class="dges-documentos-status" data-status aria-live="polite">Cargando documentos…</p>' .
             '<div class="dges-documentos-results" data-results></div></section>';
+    }
+
+public static function shortcode_destacados($atts) {
+        wp_enqueue_style('dges-documentos');
+        
+        // Obtenemos los documentos cacheados/indexados
+        $items = DGES_Docs_API::get_documents();
+        if (is_wp_error($items)) {
+            return '<p>No se pudieron cargar los documentos destacados.</p>';
+        }
+
+        // Filtramos por ejemplo los primeros 4 documentos o aquellos que tengan relevancia
+        // También podés buscar palabras clave específicas en el título
+        $destacados = array_slice($items, 0, 4); 
+
+        $atts = shortcode_atts(array('title' => 'Documentos Destacados'), $atts, 'dges_documentos_destacados');
+        
+        $output = '<section class="dges-documentos dges-destacados-section"><h2>' . esc_html($atts['title']) . '</h2><div class="dges-documentos-results">';
+        
+        if (empty($destacados)) {
+            $output .= '<p>No hay documentos destacados disponibles.</p>';
+        } else {
+            foreach ($destacados as $item) {
+                $output .= '<article class="dges-document-card">';
+                $output .= '<span class="dges-document-type">' . esc_html(ucfirst($item['type'])) . '</span>';
+                $output .= '<h3>' . esc_html($item['title']) . '</h3>';
+                if (!empty($item['description'])) {
+                    $output .= '<p>' . esc_html($item['description']) . '</p>';
+                }
+                if (!empty($item['category'])) {
+                    $output .= '<p class="dges-cat">' . esc_html($item['category']) . '</p>';
+                }
+                $output .= '<a href="' . esc_url($item['url']) . '" target="' . esc_attr($item['target']) . '" rel="noopener">Abrir documento</a>';
+                $output .= '</article>';
+            }
+        }
+        
+        $output .= '</div></section>';
+        return $output;
     }
 
 public static function register_routes() {
