@@ -15,7 +15,7 @@
         var filters = root.querySelector('[data-filters]');
         var results = root.querySelector('[data-results]');
         var status = root.querySelector('[data-status]');
-        var state = { search: '', type: '', category: '', year: '', document_type: '', number: '' };
+        var state = { txtbusqueda: '', type: '', categoria: '', anio: '', document_type: '', number: '' };
         var searchTimer;
         var allItems = [];
 
@@ -41,15 +41,34 @@
 
         function fetchDocuments() {
             status.textContent = 'Buscando…';
-            fetch(DGESDocumentos.endpoint, { headers: { 'X-WP-Nonce': DGESDocumentos.nonce } })
+
+            var params = new URLSearchParams();
+            if (state.txtbusqueda) params.append('txtbusqueda', state.txtbusqueda);
+            if (state.categoria) params.append('categoria', state.categoria);
+            if (state.anio) params.append('anio', state.anio);
+            if (state.type) params.append('type', state.type);
+            if (state.document_type) params.append('document_type', state.document_type);
+            if (state.number) params.append('number', state.number);
+
+            var url = DGESDocumentos.endpoint;
+            var queryString = params.toString();
+            if (queryString) {
+                url += '?' + queryString;
+            }
+
+            fetch(url, { headers: { 'X-WP-Nonce': DGESDocumentos.nonce } })
                 .then(function (response) {
                     if (!response.ok) throw new Error('No se pudieron cargar los documentos.');
                     return response.json();
                 })
                 .then(function (payload) {
                     allItems = payload.items || [];
-                    renderFilters(payload.facets || {});
-                    applyFilters();
+                    // Renderizamos filtros solo si vienen en el payload o mantenemos la estructura
+                    if (payload.facets) {
+                        renderFilters(payload.facets);
+                    }
+                    renderResults(allItems);
+                    status.textContent = allItems.length + ' documento(s) encontrado(s).';
                 })
                 .catch(function (error) {
                     status.textContent = error.message;
@@ -138,11 +157,10 @@
         });
         filters.addEventListener('change', function (event) {
             var field = event.target;
-            if (field.matches('[data-type]')) state.type = field.value;
-            if (field.matches('[data-category]')) state.category = field.value;
-            if (field.matches('[data-year]')) state.year = field.value;
-            if (field.matches('[data-document-type]')) state.document_type = field.value;
-            if (field.matches('[data-number]')) state.number = field.value;
+            if (field.matches('[data-search]')) state.txtbusqueda = field.value;
+            // y para categoría y año:
+            if (field.matches('[data-category]')) state.categoria = field.value;
+            if (field.matches('[data-year]')) state.anio = field.value;
             applyFilters();
         });
         filters.addEventListener('click', function (event) {
