@@ -47,16 +47,16 @@ class DGES_Docs_Plugin {
             '<div class="dges-documentos-results" data-results></div></section>';
     }
 
-    public static function register_routes() {
+public static function register_routes() {
         register_rest_route('dges-documentos/v1', '/documents', array(
             'methods' => WP_REST_Server::READABLE,
             'callback' => array(__CLASS__, 'rest_documents'),
             'permission_callback' => '__return_true',
             'args' => array(
-                'search' => array('sanitize_callback' => 'sanitize_text_field'),
+                'txtbusqueda' => array('sanitize_callback' => 'sanitize_text_field'),
+                'categoria' => array('sanitize_callback' => 'sanitize_text_field'),
+                'anio' => array('sanitize_callback' => 'absint'),
                 'type' => array('sanitize_callback' => 'sanitize_key'),
-                'category' => array('sanitize_callback' => 'sanitize_text_field'),
-                'year' => array('sanitize_callback' => 'absint'),
                 'document_type' => array('sanitize_callback' => 'sanitize_key'),
                 'number' => array('sanitize_callback' => 'sanitize_text_field'),
                 'refresh' => array('sanitize_callback' => 'rest_sanitize_boolean'),
