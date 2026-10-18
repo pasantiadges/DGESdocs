@@ -51,21 +51,26 @@ class DGES_Docs_API {
         return $items;
     }
 
-    public static function filter_documents($items, $args) {
-        $search = self::normalize_text(isset($args['search']) ? $args['search'] : '');
-        $search_tokens = $search ? preg_split('/\s+/', $search) : array();
+public static function filter_documents($items, $args) {
+        $txtbusqueda = self::normalize_text(isset($args['txtbusqueda']) ? $args['txtbusqueda'] : '');
+        $search_tokens = $txtbusqueda ? preg_split('/\s+/', $txtbusqueda) : array();
+        $category = self::normalize_text(isset($args['categoria']) ? $args['categoria'] : '');
+        $year = absint(isset($args['anio']) ? $args['anio'] : 0);
+        
         $type = sanitize_key(isset($args['type']) ? $args['type'] : '');
-        $category = self::normalize_text(isset($args['category']) ? $args['category'] : '');
-        $year = absint(isset($args['year']) ? $args['year'] : 0);
         $document_type = sanitize_key(isset($args['document_type']) ? $args['document_type'] : '');
         $number = self::normalize_text(isset($args['number']) ? $args['number'] : '');
 
-        return array_values(array_filter($items, function ($item) use ($search, $search_tokens, $type, $category, $year, $document_type, $number) {
+        return array_values(array_filter($items, function ($item) use ($txtbusqueda, $search_tokens, $category, $year, $type, $document_type, $number) {
             if ($type && $item['type'] !== $type) {
                 return false;
             }
-            if ($category && self::normalize_text($item['category']) !== $category) {
-                return false;
+            if ($category) {
+                // Comprobamos si coincide la categoría del ítem
+                $item_category = self::normalize_text(isset($item['category']) ? $item['category'] : '');
+                if (strpos($item_category, $category) === false) {
+                    return false;
+                }
             }
             if ($year && (int) $item['year'] !== $year) {
                 return false;
@@ -76,13 +81,11 @@ class DGES_Docs_API {
             if ($number && self::normalize_text($item['number']) !== $number) {
                 return false;
             }
-            if ($search) {
-                $haystack = self::normalize_text(isset($item['search_text']) ? $item['search_text'] : implode(' ', array(
-                    $item['title'],
-                    $item['category'],
-                    $item['type'],
-                    $item['url'],
+            if ($txtbusqueda) {
+                $haystack = self::normalize_text(implode(' ', array(
+                    isset($item['title']) ? $item['title'] : '',
                     isset($item['description']) ? $item['description'] : '',
+                    isset($item['category']) ? $item['category'] : '',
                 )));
                 foreach ($search_tokens as $token) {
                     if ($token !== '' && strpos($haystack, $token) === false) {
