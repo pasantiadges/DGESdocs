@@ -11,6 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 class DGES_Docs_Plugin {
 
 public static function init() {
+    // Registramos la opción para la cantidad de destacados
+        register_setting('dges_documentos', 'dges_documentos_limit_destacados', array(
+            'type' => 'integer',
+            'sanitize_callback' => 'absint',
+            'default' => 4,
+        ));
         add_shortcode('dges_documentos', array(__CLASS__, 'shortcode'));
         add_shortcode('dges_documentos_destacados', array(__CLASS__, 'shortcode_destacados')); // <--- Nuevo shortcode
         add_action('wp_enqueue_scripts', array(__CLASS__, 'register_assets'));
@@ -154,7 +160,16 @@ public static function register_routes() {
     }
 
     public static function admin_menu() {
-        add_options_page('Documentos DGES', 'Documentos DGES', 'manage_options', 'dges-documentos', array(__CLASS__, 'settings_page'));
+       // Crea una sección principal independiente en el menú de WordPress
+        add_menu_page(
+            'Documentos DGES',                      // Título de la página en la pestaña del navegador
+            'Documentos DGES',                      // Texto que se ve en el menú lateral
+            'manage_options',                       // Permisos necesarios
+            'dges-documentos',                      // Slug único de la página
+            array(__CLASS__, 'settings_page'),      // Función que dibuja la interfaz
+            'dashicons-media-document',             // Ícono de WordPress (puedes cambiarlo)
+            26                                      // Posición en el menú lateral
+        );
     }
 
     public static function register_settings() {
@@ -169,27 +184,57 @@ public static function register_routes() {
     public static function settings_page() {
         if (isset($_POST['dges_documentos_refresh']) && check_admin_referer('dges_documentos_refresh')) {
             DGES_Docs_API::clear_cache();
-            echo '<div class="notice notice-success"><p>Caché actualizada.</p></div>';
+            echo '<div class="notice notice-success is-dismissible"><p><strong>¡Caché actualizada correctamente!</strong></p></div>';
         }
         ?>
-        <div class="wrap">
-            <h1>Documentos DGES</h1>
-            <form method="post" action="options.php">
-                <?php settings_fields('dges_documentos'); ?>
-                <table class="form-table">
-                    <tr>
-                        <th><label for="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>">URL de origen</label></th>
-                        <td><input class="regular-text code" type="url" id="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>" name="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>" value="<?php echo esc_attr(DGES_Docs_API::get_source_url()); ?>" required></td>
-                    </tr>
-                </table>
-                <?php submit_button('Guardar URL'); ?>
-            </form>
-            <form method="post">
-                <?php wp_nonce_field('dges_documentos_refresh'); ?>
-                <input type="hidden" name="dges_documentos_refresh" value="1">
-                <?php submit_button('Vaciar caché y volver a importar', 'secondary'); ?>
-            </form>
-            <p>Usá <code>[dges_documentos]</code> para insertar el filtro en una página.</p>
+        <div class="wrap" style="max-width: 1000px;">
+            <!-- Cabecera con estilo institucional similar a DGES -->
+            <div style="background: #6c5ce7; color: #fff; padding: 20px 25px; border-radius: 4px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h1 style="color: #fff; margin: 0 0 5px 0; font-size: 24px;">Configuración - Documentos DGES</h1>
+                <p style="margin: 0; opacity: 0.9;">Configure la conexión con la API oficial de la base de datos de documentos y gestión de caché.</p>
+            </div>
+
+            <!-- Formulario de Configuración de API -->
+            <div class="card" style="padding: 20px; margin-top: 0; background: #fff; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Configuración de la API</h2>
+                <form method="post" action="options.php">
+                    <?php 
+                    settings_fields('dges_documentos'); 
+                    do_settings_sections('dges_documentos'); 
+                    ?>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row"><label for="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>">URL del JSON de Documentos</label></th>
+                            <td>
+                                <input class="regular-text code" type="url" id="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>" name="<?php echo esc_attr(DGES_Docs_API::OPTION_URL); ?>" value="<?php echo esc_attr(DGES_Docs_API::get_source_url()); ?>" style="width: 100%; max-width: 600px;" required>
+                                <p class="description">Ingrese la URL completa de la API oficial que devuelve el JSON con los documentos, categorías y archivos.</p>
+                            </td>
+                        </tr>
+                    </table>
+                    <?php submit_button('Guardar Configuración'); ?>
+                </form>
+            </div>
+
+            <!-- Sección de Gestión de Caché -->
+            <div class="card" style="padding: 20px; background: #fff; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Gestión de Caché y Rendimiento</h2>
+                <p>El sistema almacena temporalmente los registros para agilizar las consultas. Si se actualizaron datos en la base oficial y necesita forzar la recarga inmediata, utilice el siguiente botón:</p>
+                <form method="post">
+                    <?php wp_nonce_field('dges_documentos_refresh'); ?>
+                    <input type="hidden" name="dges_documentos_refresh" value="1">
+                    <?php submit_button('Vaciar Caché y Actualizar Datos', 'secondary'); ?>
+                </form>
+            </div>
+
+            <!-- Guía rápida de Shortcodes -->
+            <div class="card" style="padding: 20px; background: #fff; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px;">Shortcodes Disponibles</h2>
+                <p>Utilice las siguientes etiquetas para insertar los componentes en cualquier página o entrada:</p>
+                <ul style="list-style: disc; margin-left: 20px;">
+                    <li><code>[dges_documentos]</code> — Muestra el buscador avanzado con filtros en tiempo real y resultados interactivos.</li>
+                    <li><code>[dges_documentos_destacados]</code> — Muestra una sección resumida con los documentos clave.</li>
+                </ul>
+            </div>
         </div>
         <?php
     }
