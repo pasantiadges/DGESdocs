@@ -10,6 +10,7 @@ async function loadPage(root, state, append) {
     if (state.loading) return;
     state.loading = true;
 
+    // Buscamos los elementos de forma segura
     const statusEl = root.querySelector('[data-status]');
     const resultsEl = root.querySelector('[data-results]');
     const filtersEl = root.querySelector('[data-filters]');
@@ -42,6 +43,10 @@ async function loadPage(root, state, append) {
 }
 
 function init(root) {
+    // ¡IMPORTANTE! Evitamos que el script se ejecute dos veces en la misma sección
+    if (root.dataset.dgesInit) return;
+    root.dataset.dgesInit = 'true';
+
     const state = createState();
 
     const reload = () => {
