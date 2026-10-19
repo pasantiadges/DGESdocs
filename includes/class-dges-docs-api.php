@@ -26,7 +26,7 @@ class DGES_Docs_API {
         delete_transient(self::CACHE_KEY);
     }
 
-    public static function get_documents($force_refresh = false) {
+      public static function get_documents($force_refresh = false) {
         if (!$force_refresh) {
             $cached = get_transient(self::CACHE_KEY);
             if (is_array($cached)) {
@@ -44,52 +44,72 @@ class DGES_Docs_API {
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-        // Validamos la estructura del JSON devuelto por la API oficial {"documentos": [...]}
         if (!is_array($data) || !isset($data['documentos'])) {
-            return new WP_Error('dges_api_error', 'No se pudo obtener el listado de documentos de la API oficial.');
+            return new WP_Error('dges_api_error', 'No se pudo obtener el listado de documentos.');
         }
 
         $items = $data['documentos'];
+        $mapped_items = array();
 
-        // Guardamos en caché por 1 hora
-        set_transient(self::CACHE_KEY, $items, self::CACHE_TTL);
-        return $items;
+        foreach ($items as $item) {
+            // Manejo de la categoría
+            $cat_nombre = '';
+            if (!empty($item['categorias']) && is_array($item['categorias'])) {
+                $cat_nombre = isset($item['categorias'][0]['nombre']) ? $item['categorias'][0]['nombre'] : '';
+            }
+
+            // Manejo del archivo principal (URL y Tipo)
+            $url_archivo = '#';
+            $tipo_archivo = 'PDF'; // por defecto
+            if (!empty($item['archivos']) && is_array($item['archivos'])) {
+                $archivo = $item['archivos'][0];
+                $tipo_archivo = isset($archivo['tipo']) ? strtoupper($archivo['tipo']) : 'PDF';
+                // Armamos la URL ficticia para probar (en producción usarías la carpeta real)
+                if (isset($archivo['nombre_archivo'])) {
+                    $url_archivo = 'https://bd.dges-cba.edu.ar/bd_dges/archivos/' . (isset($archivo['carpeta']) ? $archivo['carpeta'] : '') . '/' . $archivo['nombre_archivo'];
+                }
+            }
+
+            $mapped_items[] = array(
+                'id'          => isset($item['id']) ? $item['id'] : '',
+                'title'       => isset($item['nombre']) ? $item['nombre'] : '',
+                'description' => isset($item['observacion']) ? $item['observacion'] : '',
+                'year'        => isset($item['anio']) ? $item['anio'] : '',
+                'category'    => $cat_nombre,
+                'type'        => $tipo_archivo, // Ahora dice "PDF" o "XLSX" real
+                'url'         => $url_archivo,
+                'target'      => '_blank',
+                'destacado'   => (isset($item['destacado']) && $item['destacado'] === 'Si'),
+                'related'     => isset($item['documentos_relacionados']) ? $item['documentos_relacionados'] : array()
+            );
+        }
+
+        set_transient(self::CACHE_KEY, $mapped_items, self::CACHE_TTL);
+        return $mapped_items;
     }
 
     public static function filter_documents($items, $args) {
         $txtbusqueda = self::normalize_text(isset($args['txtbusqueda']) ? $args['txtbusqueda'] : '');
         $categoria_filtro = self::normalize_text(isset($args['categoria']) ? $args['categoria'] : '');
         $anio_filtro = absint(isset($args['anio']) ? $args['anio'] : 0);
-        $type_filtro = self::normalize_text(isset($args['type']) ? $args['type'] : '');
+        
         return array_values(array_filter($items, function ($item) use ($txtbusqueda, $categoria_filtro, $anio_filtro) {
             
-            // 1. Filtrar por Año
-            if ($anio_filtro && (int) (isset($item['anio']) ? $item['anio'] : 0) !== $anio_filtro) {
+            // 1. Filtrar por Año (comparando ambos como string)
+            if ($anio_filtro && (string) $item['year'] !== (string) $anio_filtro) {
                 return false;
             }
 
-            // 2. Filtrar por Categoría (recorriendo el array de categorías del JSON)
+            // 2. Filtrar por Categoría
             if ($categoria_filtro) {
-                $match_cat = false;
-                if (!empty($item['categorias']) && is_array($item['categorias'])) {
-                    foreach ($item['categorias'] as $cat) {
-                        if (strpos(self::normalize_text(isset($cat['nombre']) ? $cat['nombre'] : ''), $categoria_filtro) !== false) {
-                            $match_cat = true;
-                            break;
-                        }
-                    }
-                }
-                if (!$match_cat) {
+                if (strpos(self::normalize_text($item['category']), $categoria_filtro) === false) {
                     return false;
                 }
             }
 
-            // 3. Filtrar por Texto (en nombre y observación)
+            // 3. Filtrar por Texto
             if ($txtbusqueda) {
-                $nombre = isset($item['nombre']) ? $item['nombre'] : '';
-                $observacion = isset($item['observacion']) ? $item['observacion'] : '';
-                $haystack = self::normalize_text($nombre . ' ' . $observacion);
-                
+                $haystack = self::normalize_text($item['title'] . ' ' . $item['description']);
                 if (strpos($haystack, $txtbusqueda) === false) {
                     return false;
                 }
