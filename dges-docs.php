@@ -19,7 +19,10 @@ define('DGES_DOCS_DIR', plugin_dir_path(__FILE__));
 define('DGES_DOCS_URL', plugin_dir_url(__FILE__));
 
 // Importación de las clases principales ubicadas en la carpeta includes.
+// El orden importa: API y Render primero, luego Settings, luego Plugin.
 require_once DGES_DOCS_DIR . 'includes/class-dges-docs-api.php';
+require_once DGES_DOCS_DIR . 'includes/class-dges-docs-render.php';    // 👈 NUEVO
+require_once DGES_DOCS_DIR . 'includes/class-dges-docs-settings.php';  // 👈 NUEVO
 require_once DGES_DOCS_DIR . 'includes/class-dges-docs-plugin.php';
 
 // Hooks de ciclo de vida de WordPress: activación y carga del plugin.
