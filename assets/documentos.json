@@ -1,0 +1,319 @@
+{
+  "documentos": [
+    {
+      "id": "1",
+      "nombre": "Resolución N° 123/2025 - Marco Regulatorio Institucional",
+      "observacion": "Establece las pautas generales para el funcionamiento de los institutos superiores.",
+      "mes": "11",
+      "anio": "2025",
+      "vigente": "Si",
+      "destacado": "Si",
+      "categorias": [
+        {
+          "idcategoria": "1",
+          "nombre": "Normativas DGES"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "101",
+          "nombre": "Resolucion_123_2025.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2025/11",
+          "nombre_archivo": "2025_11_res_123.pdf",
+          "tamanio": "12450"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "2",
+          "nombre": "Anexo I - Pautas de aplicación práctica",
+          "observacion": "Detalle complementario de artículos 4 al 12",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2025/11/anexo_123.pdf"
+        },
+        {
+          "id": "3",
+          "nombre": "Memorándum Aclaratorio N° 045/2026",
+          "observacion": "Aclaraciones sobre la implementación inicial",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2026/03/memo_45.pdf"
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "nombre": "Anexo I - Pautas de aplicación práctica",
+      "observacion": "Detalle complementario de artículos 4 al 12 de la Res. 123.",
+      "mes": "11",
+      "anio": "2025",
+      "vigente": "Si",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "1",
+          "nombre": "Normativas DGES"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "102",
+          "nombre": "anexo_123.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2025/11",
+          "nombre_archivo": "2025_11_anexo_123.pdf",
+          "tamanio": "5120"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "1",
+          "nombre": "Resolución N° 123/2025 - Marco Regulatorio Institucional",
+          "observacion": "Resolución de origen",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2025/11/2025_11_res_123.pdf"
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "nombre": "Memorándum Aclaratorio N° 045/2026",
+      "observacion": "Aclaraciones sobre la implementación del nuevo régimen académico.",
+      "mes": "03",
+      "anio": "2026",
+      "vigente": "Si",
+      "destacado": "Si",
+      "categorias": [
+        {
+          "idcategoria": "2",
+          "nombre": "Memorándums"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "103",
+          "nombre": "memo_045_2026.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2026/03",
+          "nombre_archivo": "2026_03_memo_45.pdf",
+          "tamanio": "3400"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "1",
+          "nombre": "Resolución N° 123/2025 - Marco Regulatorio Institucional",
+          "observacion": "Normativa principal vinculada",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2025/11/2025_11_res_123.pdf"
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "nombre": "Disposición N° 012/2026 - Concursos Docentes",
+      "observacion": "Cronograma y pautas para la cobertura de horas cátedra.",
+      "mes": "04",
+      "anio": "2026",
+      "vigente": "Si",
+      "destacado": "Si",
+      "categorias": [
+        {
+          "idcategoria": "3",
+          "nombre": "Disposiciones"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "104",
+          "nombre": "disposicion_012.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2026/04",
+          "nombre_archivo": "2026_04_disp_12.pdf",
+          "tamanio": "8900"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "9",
+          "nombre": "Circular N° 002/2026 - Licencias y Justificaciones",
+          "observacion": "Circular complementaria sobre incompatibilidades",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2026/05/2026_05_circ_02.pdf"
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "nombre": "Planilla de Registro de Trayectorias Estudiantiles",
+      "observacion": "Formato único para el seguimiento de estudiantes en profesorados.",
+      "mes": "02",
+      "anio": "2026",
+      "vigente": "Si",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "4",
+          "nombre": "Planillas y Formatos"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "105",
+          "nombre": "planilla_trayectorias.xlsx",
+          "tipo": "XLSX",
+          "carpeta": "archivos/2026/02",
+          "nombre_archivo": "2026_02_planilla.xlsx",
+          "tamanio": "15400"
+        }
+      ],
+      "documentos_relacionados": []
+    },
+    {
+      "id": "6",
+      "nombre": "Resolución N° 089/2024 - Lineamientos Curriculares",
+      "observacion": "Modificación del diseño curricular para tecnicaturas superiores.",
+      "mes": "08",
+      "anio": "2024",
+      "vigente": "Si",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "1",
+          "nombre": "Normativas DGES"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "106",
+          "nombre": "res_089_2024.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2024/08",
+          "nombre_archivo": "2024_08_res_89.pdf",
+          "tamanio": "21000"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "7",
+          "nombre": "Diseño Curricular Base - Desarrollo Web",
+          "observacion": "Estructura de materias de la tecnicatura",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2024/08/diseno_web.pdf"
+        }
+      ]
+    },
+    {
+      "id": "7",
+      "nombre": "Diseño Curricular Base - Desarrollo Web",
+      "observacion": "Estructura de materias y correlatividades para la Tecnicatura en Desarrollo Web.",
+      "mes": "08",
+      "anio": "2024",
+      "vigente": "Si",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "5",
+          "nombre": "Diseños Curriculares"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "107",
+          "nombre": "diseno_web.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2024/08",
+          "nombre_archivo": "2024_08_diseno_web.pdf",
+          "tamanio": "18500"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "6",
+          "nombre": "Resolución N° 089/2024 - Lineamientos Curriculares",
+          "observacion": "Resolución marco aprobatoria",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2024/08/2024_08_res_89.pdf"
+        }
+      ]
+    },
+    {
+      "id": "8",
+      "nombre": "Instructivo para Rendición de Gastos Institucionales",
+      "observacion": "Guía paso a paso para la presentación de comprobantes y balances anuales.",
+      "mes": "01",
+      "anio": "2025",
+      "vigente": "Si",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "6",
+          "nombre": "Instructivos"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "108",
+          "nombre": "instructivo_gastos.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2025/01",
+          "nombre_archivo": "2025_01_gastos.pdf",
+          "tamanio": "4500"
+        }
+      ],
+      "documentos_relacionados": []
+    },
+    {
+      "id": "9",
+      "nombre": "Circular N° 002/2026 - Licencias y Justificaciones",
+      "observacion": "Actualización de criterios para licencias médicas y gremiales.",
+      "mes": "05",
+      "anio": "2026",
+      "vigente": "Si",
+      "destacado": "Si",
+      "categorias": [
+        {
+          "idcategoria": "7",
+          "nombre": "Circulares"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "109",
+          "nombre": "circular_002.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2026/05",
+          "nombre_archivo": "2026_05_circ_02.pdf",
+          "tamanio": "2900"
+        }
+      ],
+      "documentos_relacionados": [
+        {
+          "id": "4",
+          "nombre": "Disposición N° 012/2026 - Concursos Docentes",
+          "observacion": "Vinculado a condiciones de cobertura",
+          "url": "https://bd.dges-cba.edu.ar/bd_dges/archivos/2026/04/2026_04_disp_12.pdf"
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "nombre": "Resolución N° 450/2023 - Prácticas Profesionalizantes",
+      "observacion": "Marco general para las pasantías y prácticas en instituciones asociadas.",
+      "mes": "10",
+      "anio": "2023",
+      "vigente": "No",
+      "destacado": "No",
+      "categorias": [
+        {
+          "idcategoria": "1",
+          "nombre": "Normativas DGES"
+        }
+      ],
+      "archivos": [
+        {
+          "idarchivo": "110",
+          "nombre": "res_450_2023.pdf",
+          "tipo": "PDF",
+          "carpeta": "archivos/2023/10",
+          "nombre_archivo": "2023_10_res_450.pdf",
+          "tamanio": "11200"
+        }
+      ],
+      "documentos_relacionados": []
+    }
+  ]
+}
