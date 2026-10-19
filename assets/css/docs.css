@@ -218,3 +218,185 @@
         gap: 14px;
     }
 }
+/* Barra de búsqueda principal */
+.dges-search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dges-search-input {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.dges-toggle-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f0f1;
+    border: 1px solid #ccc;
+    padding: 0 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.dges-toggle-filters:hover, .dges-toggle-filters.is-active {
+    background: #2271b1;
+    color: white;
+    border-color: #2271b1;
+}
+
+/* Contenedor de filtros desplegable */
+.dges-documentos-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.dges-documentos-filters label {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    min-width: 150px;
+}
+
+.dges-documentos-filters select {
+    margin-top: 5px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Tarjetas */
+.dges-documentos-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dges-document-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.dges-document-card h3 {
+    margin: 10px 0;
+    font-size: 18px;
+    color: #2271b1;
+}
+
+.dges-document-type {
+    font-size: 11px;
+    background: #2271b1;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 12px;
+    align-self: flex-start;
+    font-weight: bold;
+}
+
+.dges-cat {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.dges-document-card a {
+    margin-top: auto;
+    font-weight: bold;
+    text-decoration: none;
+    color: #2271b1;
+}
+.dges-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dges-badge-destacado {
+    background: #ffc107;
+    color: #333;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.dges-card-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.dges-btn-open {
+    display: inline-block;
+    background: #f0f0f1;
+    color: #2271b1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.dges-btn-open:hover {
+    background: #2271b1;
+    color: white;
+}
+/* Hacemos que las tarjetas destacadas sean más pequeñas (4 columnas) */
+.dges-destacados-section .dges-documentos-results {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Achicamos las letras y los márgenes SOLO de las destacadas */
+.dges-destacados-section .dges-document-card {
+    padding: 15px;
+}
+
+.dges-destacados-section .dges-document-card h3 {
+    font-size: 15px;
+    margin: 5px 0;
+}
+
+.dges-destacados-section .dges-document-card p {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.dges-destacados-section .dges-btn-open,
+.dges-destacados-section .dges-cat,
+.dges-destacados-section .dges-card-meta {
+    font-size: 12px;
+}
+
+/* En celulares vuelven a 1 columna */
+@media (max-width: 768px) {
+    .dges-destacados-section .dges-documentos-results {
+        grid-template-columns: 1fr;
+    }
+}
