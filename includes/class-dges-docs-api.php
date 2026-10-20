@@ -60,7 +60,7 @@ class DGES_Docs_API {
         $document_type = sanitize_key(isset($args['document_type']) ? $args['document_type'] : '');
         $number = self::normalize_text(isset($args['number']) ? $args['number'] : '');
 
-        return array_values(array_filter($items, function ($item) use ($search, $search_tokens, $type, $category, $year, $document_type, $number) {
+        return self::sort_documents(array_filter($items, function ($item) use ($search, $search_tokens, $type, $category, $year, $document_type, $number) {
             if ($type && $item['type'] !== $type) {
                 return false;
             }
@@ -202,7 +202,7 @@ class DGES_Docs_API {
 
             $seen[$absolute_url] = true;
             $extension = strtolower(pathinfo((string) wp_parse_url($absolute_url, PHP_URL_PATH), PATHINFO_EXTENSION));
-            $title_text = wp_strip_all_tags(html_entity_decode($title, ENT_QUOTES, 'UTF-8'));
+            $title_text = self::clean_title(wp_strip_all_tags(html_entity_decode($title, ENT_QUOTES, 'UTF-8')));
             $root_host = strtolower((string) wp_parse_url($source_url, PHP_URL_HOST));
             if (self::is_crawlable_page($absolute_url, $extension, $root_host)) {
                 $child_pages[] = array('url' => $absolute_url, 'title' => $title_text);
@@ -362,8 +362,51 @@ class DGES_Docs_API {
         }
 
         $description = trim(preg_replace('/\s+/', ' ', $clone->textContent));
-        $description = preg_replace('/^' . preg_quote($title, '/') . '\s*/iu', '', $description);
-        return trim(wp_strip_all_tags(html_entity_decode($description, ENT_QUOTES, 'UTF-8')));
+        $description = trim(wp_strip_all_tags(html_entity_decode($description, ENT_QUOTES, 'UTF-8')));
+        $title_text = trim(wp_strip_all_tags(html_entity_decode($title, ENT_QUOTES, 'UTF-8')));
+        if ($title_text !== '') {
+            $description = preg_replace('/^' . preg_quote($title_text, '/') . '\s*/iu', '', $description);
+        }
+        // En la fuente el texto suele ser "Título: descripción"; al quitar el título queda ": ..." al inicio.
+        $description = preg_replace('/^[\s:;,.\-–—]+/u', '', $description);
+        return self::upper_first($description);
+    }
+
+    private static function upper_first($text) {
+        if ($text === '' || !function_exists('mb_strtoupper')) {
+            return $text;
+        }
+        return mb_strtoupper(mb_substr($text, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($text, 1, null, 'UTF-8');
+    }
+
+    /**
+     * Unifica la escritura de los títulos: "Memorandum" pasa a "Memorándum".
+     */
+    private static function clean_title($title) {
+        $title = trim(preg_replace('/\s+/u', ' ', $title));
+        $title = preg_replace('/[\s:;,\-–—]+$/u', '', $title);
+        return preg_replace('/\bMemorandum\b/u', 'Memorándum', $title);
+    }
+
+    /**
+     * Ordena de más nuevo a más viejo: por año, luego por número y luego por título.
+     * Los documentos sin año quedan al final.
+     */
+    public static function sort_documents($items) {
+        usort($items, function ($a, $b) {
+            $year_a = (int) $a['year'];
+            $year_b = (int) $b['year'];
+            if ($year_a !== $year_b) {
+                return $year_b <=> $year_a;
+            }
+            $number_a = isset($a['number']) ? (int) $a['number'] : 0;
+            $number_b = isset($b['number']) ? (int) $b['number'] : 0;
+            if ($number_a !== $number_b) {
+                return $number_b <=> $number_a;
+            }
+            return strnatcasecmp($a['title'], $b['title']);
+        });
+        return $items;
     }
 
     private static function related_documents($list_item, $source_url, &$seen) {
