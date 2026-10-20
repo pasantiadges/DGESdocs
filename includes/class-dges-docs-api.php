@@ -219,7 +219,7 @@ class DGES_Docs_API {
                 'type' => $type,
                 'extension' => $extension,
                 'category' => self::infer_category($title, $absolute_url) ?: $parent_category,
-                'year' => self::infer_year($title . ' ' . $absolute_url),
+                'year' => self::infer_year($title . ' ' . self::url_without_upload_date($absolute_url)),
                 'target' => $link->getAttribute('target') ?: '_self',
                 'source_page' => $source_url,
             );
@@ -369,6 +369,11 @@ class DGES_Docs_API {
         }
         // En la fuente el texto suele ser "Título: descripción"; al quitar el título queda ": ..." al inicio.
         $description = preg_replace('/^[\s:;,.\-–—]+/u', '', $description);
+        // Cuando un ítem tiene dos enlaces ("Res. 82/25 y 83/25: ...") queda "y : ..." al inicio.
+        $description = preg_replace('/^(?:y|e)\s*[:;,\-–—]+\s*/iu', '', $description);
+        if (!preg_match('/[\p{L}\p{N}]/u', $description)) {
+            return '';
+        }
         return self::upper_first($description);
     }
 
@@ -431,7 +436,7 @@ class DGES_Docs_API {
                 'url' => esc_url_raw($url),
                 'type' => self::type_from_extension($extension),
                 'extension' => $extension,
-                'year' => self::infer_year($title . ' ' . $url),
+                'year' => self::infer_year($title . ' ' . self::url_without_upload_date($url)),
                 'target' => $link->getAttribute('target') ?: '_self',
             );
             $related_item['description'] = '';
@@ -464,10 +469,20 @@ class DGES_Docs_API {
         $metadata = self::extract_document_metadata($item['title']);
         $item['document_type'] = $metadata['document_type'];
         $item['number'] = $metadata['number'];
-        if (!$item['year'] && $metadata['year']) {
+        // El año que figura en el número ("1377-13", "06/21") es el del documento,
+        // así que tiene prioridad sobre el que aparece en el título o la URL.
+        if ($metadata['year'] && ($metadata['number'] || !$item['year'])) {
             $item['year'] = $metadata['year'];
         }
         return $item;
+    }
+
+    /**
+     * Quita de la URL las carpetas de fecha de subida de WordPress ("/uploads/2026/05/"),
+     * porque indican cuándo se subió el archivo y no el año del documento.
+     */
+    private static function url_without_upload_date($url) {
+        return preg_replace('#/uploads/(19|20)\d{2}/\d{2}/#', '/uploads/', (string) $url);
     }
 
     private static function extract_document_metadata($title) {
@@ -496,7 +511,13 @@ class DGES_Docs_API {
         if (preg_match('/\b(?:conjunta\s*)?(\d{1,5})(?:\s*[-\/]\s*|\s+)(\d{2,4})\b/u', $normalized, $match)) {
             $number = $match[1];
             $year = (int) $match[2];
-            $year = $year < 100 ? 2000 + $year : $year;
+            if ($year < 100) {
+                // Dos dígitos: "13" es 2013, pero "98" es 1998.
+                $year += ($year <= (int) gmdate('y') + 1) ? 2000 : 1900;
+            }
+            if ($year < 1900 || $year > (int) gmdate('Y') + 1) {
+                $year = self::infer_year($title);
+            }
         } else {
             $year = self::infer_year($title);
         }
