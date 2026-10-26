@@ -75,6 +75,9 @@ class DGES_Docs_API {
                 'title'       => isset($item['nombre']) ? $item['nombre'] : '',
                 'description' => isset($item['observacion']) ? $item['observacion'] : '',
                 'year'        => isset($item['anio']) ? $item['anio'] : '',
+                // Mes y número se usan solo para ordenar (ver sort_documents).
+                'month'       => isset($item['mes']) ? absint($item['mes']) : 0,
+                'doc_number'  => isset($item['numero']) ? (string) $item['numero'] : '',
                 'category'    => $cat_nombre,
                 'type'        => $tipo_archivo, // Ahora dice "PDF" o "XLSX" real
                 'url'         => $url_archivo,
@@ -93,7 +96,7 @@ class DGES_Docs_API {
         $categoria_filtro = self::normalize_text(isset($args['categoria']) ? $args['categoria'] : '');
         $anio_filtro = absint(isset($args['anio']) ? $args['anio'] : 0);
         
-        return array_values(array_filter($items, function ($item) use ($txtbusqueda, $categoria_filtro, $anio_filtro) {
+        return self::sort_documents(array_filter($items, function ($item) use ($txtbusqueda, $categoria_filtro, $anio_filtro) {
             
             // 1. Filtrar por Año (comparando ambos como string)
             if ($anio_filtro && (string) $item['year'] !== (string) $anio_filtro) {
@@ -117,6 +120,28 @@ class DGES_Docs_API {
 
             return true;
         }));
+    }
+
+    /**
+     * Ordena de más nuevo a más viejo: año, mes y número (de mayor a menor),
+     * y por último el título. Los documentos sin año quedan al final.
+     * Se ordena antes de paginar, así el orden vale para todas las páginas.
+     */
+    public static function sort_documents($items) {
+        usort($items, function ($a, $b) {
+            $keys = array('year', 'month', 'doc_number');
+            foreach ($keys as $key) {
+                $value_a = isset($a[$key]) ? (int) $a[$key] : 0;
+                $value_b = isset($b[$key]) ? (int) $b[$key] : 0;
+                if ($value_a !== $value_b) {
+                    return $value_b <=> $value_a;
+                }
+            }
+            $title_a = isset($a['title']) ? (string) $a['title'] : '';
+            $title_b = isset($b['title']) ? (string) $b['title'] : '';
+            return strnatcasecmp($title_a, $title_b);
+        });
+        return $items;
     }
 
     private static function normalize_text($value) {
