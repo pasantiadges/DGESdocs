@@ -1,58 +1,110 @@
 import { debounce } from './utils.js';
 
-export function bindEvents({ filtersEl, loadMoreBtn, state, onSearch, onFilterChange, onReset, onLoadMore }) {
-    const searchInput = document.querySelector('[data-search]');
-    const toggleBtn = document.querySelector('[data-toggle-filters]');
+export function bindEvents(root, state, handlers) {
+    const form = root.querySelector('[data-dges-search-form]');
+    const input = root.querySelector('[data-search]');
+    const select = root.querySelector('[data-category]');
+    const clearSearch = root.querySelector('[data-clear-search]');
+    const clearFilters = root.querySelector('.dges-search-bar [data-clear-filters]');
+    const loadMore = root.querySelector('[data-load-more]');
+    const retry = root.querySelector('[data-error] [data-retry]');
+    const emptyClear = root.querySelector('[data-empty] [data-clear-filters]');
 
-    // 1. Escuchar la barra de búsqueda principal (la de arriba)
-    if (searchInput) {
-        const debouncedSearch = debounce(() => {
-            state.filters.txtbusqueda = searchInput.value;
-            onSearch();
-        }, 300);
+    const debouncedSearch = debounce(function (value) {
+        handlers.onSearch(value, { push: false });
+    }, 400);
 
-        searchInput.addEventListener('input', debouncedSearch);
-    }
-
-    // 2. Escuchar los selectores de filtros (Categoría, Año, Número)
-    if (filtersEl) {
-        filtersEl.addEventListener('change', (e) => {
-            const map = {
-                '[data-category]': 'categoria',
-                '[data-year]': 'anio',
-                '[data-number]': 'number',
-            };
-            for (const sel in map) {
-                if (e.target.matches(sel)) {
-                    state.filters[map[sel]] = e.target.value;
-                    onFilterChange();
-                    return;
-                }
-            }
+    if (input) {
+        input.addEventListener('input', function () {
+            handlers.onInput(input.value);
+            debouncedSearch(input.value);
         });
 
-        // 3. Escuchar el botón de "Limpiar"
-        filtersEl.addEventListener('click', (e) => {
-            if (e.target.matches('[data-reset]')) {
-                if (searchInput) searchInput.value = ''; // Limpiamos la barra de arriba
-                onReset();
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                debouncedSearch.cancel();
+                handlers.onSearch(input.value, { push: true });
+                return;
+            }
+
+            if (event.key === 'Escape' && input.value !== '') {
+                event.preventDefault();
+                debouncedSearch.cancel();
+                input.value = '';
+                handlers.onClearSearch();
             }
         });
     }
 
-    // 4. Mostrar/ocultar el panel de filtros
-    if (toggleBtn && filtersEl) {
-        toggleBtn.addEventListener('click', () => {
-            const isHidden = filtersEl.style.display === 'none';
-            filtersEl.style.display = isHidden ? 'flex' : 'none';
-            toggleBtn.classList.toggle('is-active', isHidden);
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            debouncedSearch.cancel();
+            handlers.onSearch(input ? input.value : '', { push: true });
         });
     }
 
-    // 5. Botón "Ver más"
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
-            if (state.hasMore && !state.loading) onLoadMore();
+    if (select) {
+        select.addEventListener('change', function () {
+            debouncedSearch.cancel();
+            handlers.onCategory(select.value);
         });
     }
+
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function () {
+            debouncedSearch.cancel();
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            handlers.onClearSearch();
+        });
+    }
+
+    if (clearFilters) {
+        clearFilters.addEventListener('click', function () {
+            debouncedSearch.cancel();
+            if (input) input.value = '';
+            if (select) select.value = '';
+            handlers.onClear();
+            if (input) input.focus();
+        });
+    }
+
+    if (emptyClear) {
+        emptyClear.addEventListener('click', function (event) {
+            event.preventDefault();
+            debouncedSearch.cancel();
+            if (input) input.value = '';
+            if (select) select.value = '';
+            handlers.onClear();
+            if (input) input.focus();
+        });
+    }
+
+    if (loadMore) {
+        loadMore.addEventListener('click', function (event) {
+            event.preventDefault();
+            debouncedSearch.cancel();
+
+            if (!state.loading && state.hasMore) {
+                handlers.onLoadMore();
+            }
+        });
+    }
+
+    if (retry) {
+        retry.addEventListener('click', function (event) {
+            event.preventDefault();
+            debouncedSearch.cancel();
+            handlers.onRetry();
+        });
+    }
+
+    window.addEventListener('popstate', function () {
+        debouncedSearch.cancel();
+        handlers.onPopState();
+    });
 }

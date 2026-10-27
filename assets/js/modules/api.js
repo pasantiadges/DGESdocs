@@ -1,17 +1,40 @@
-export async function fetchDocuments(state) {
-    const cfg = window.DGESDocumentos || {};
-    const params = new URLSearchParams();
-    params.set('page', state.page);
-    params.set('per_page', state.perPage);
+export async function fetchDocuments(state, signal) {
+    const config = window.DGESDocumentos || {};
+    const endpoint = config.endpoint || '';
 
-    Object.entries(state.filters).forEach(([k, v]) => {
-        if (v !== '' && v !== null && v !== undefined) params.set(k, v);
+    if (!endpoint) {
+        throw new Error('DGES: falta el endpoint de documentos.');
+    }
+
+    const params = new URLSearchParams();
+    params.set('page', String(state.page));
+    params.set('per_page', String(state.perPage));
+
+    if (state.search) params.set('search', state.search);
+    if (state.category) params.set('category', state.category);
+
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const url = `${endpoint}${separator}${params.toString()}`;
+
+    const response = await fetch(url, {
+        signal,
+        headers: { Accept: 'application/json' },
     });
 
-    const sep = cfg.endpoint.includes('?') ? '&' : '?';
-    const url = cfg.endpoint + sep + params.toString();
+    if (!response.ok) {
+        let message = '';
 
-    const res = await fetch(url, { headers: { 'X-WP-Nonce': cfg.nonce } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+        try {
+            const data = await response.json();
+            message = data?.message || '';
+        } catch (error) {
+            // La respuesta de error no era JSON; usamos el status.
+        }
+
+        const requestError = new Error(message || `HTTP ${response.status}`);
+        requestError.status = response.status;
+        throw requestError;
+    }
+
+    return response.json();
 }

@@ -1,77 +1,150 @@
-import { escapeHtml, label } from './utils.js';
+import { sprintf } from './utils.js';
+import { pageUrl } from './state.js';
 
-export function renderFilters(container, facets, state) {
-    container.innerHTML =
-        '<label>Categoría <select data-category><option value="">Todas</option>' +
-            (facets.categories || []).map(function (i) {
-                return '<option value="' + escapeHtml(i) + '"' +
-                    (state.filters.categoria === i ? ' selected' : '') + '>' +
-                    escapeHtml(i) + '</option>';
-            }).join('') + '</select></label>' +
-        '<label>Año <select data-year><option value="">Todos</option>' +
-            (facets.years || []).map(function (i) {
-                return '<option value="' + i + '"' +
-                    (String(state.filters.anio) === String(i) ? ' selected' : '') + '>' +
-                    i + '</option>';
-            }).join('') + '</select></label>' +
-        '<label>Número <select data-number><option value="">Todos</option>' +
-            (facets.numbers || []).map(function (i) {
-                return '<option value="' + escapeHtml(i) + '"' +
-                    (state.filters.number === i ? ' selected' : '') + '>' +
-                    escapeHtml(i) + '</option>';
-            }).join('') + '</select></label>' +
-        '<button type="button" data-reset>Limpiar</button>';
+export function renderItems(container, items, append = false) {
+    if (!container) return;
 
-    // Sincronizamos solo los selectores que quedaron
-    if (container.querySelector('[data-category]')) container.querySelector('[data-category]').value = state.filters.categoria;
-    if (container.querySelector('[data-year]')) container.querySelector('[data-year]').value = state.filters.anio;
-    if (container.querySelector('[data-number]')) container.querySelector('[data-number]').value = state.filters.number;
+    const html = (items || [])
+        .map(function (item) {
+            return item && item.html ? item.html : '';
+        })
+        .join('');
+
+    if (append) {
+        if (html) container.insertAdjacentHTML('beforeend', html);
+    } else {
+        container.innerHTML = html;
+    }
 }
 
-// El resto del archivo (renderResults, cardTemplate, setStatus, updateLoadMore) se mantiene igual.
-export function renderResults(container, items) {
-    container.innerHTML = items.length
-        ? items.map(cardTemplate).join('')
-        : '<p>No se encontraron documentos con esos filtros.</p>';
-}
-
-function cardTemplate(item) {
-    return '<article class="dges-document-card">' +
-        '<div class="dges-card-header">' +
-            '<span class="dges-document-type">' + escapeHtml(label(item.type)) + '</span>' +
-            (item.destacado ? '<span class="dges-badge-destacado">★ Destacado</span>' : '') +
-        '</div>' +
-        '<h3>' + escapeHtml(item.title) + '</h3>' +
-        (item.description ? '<p>' + escapeHtml(item.description) + '</p>' : '') +
-        '<div class="dges-card-meta">' +
-            (item.category ? '<span>' + escapeHtml(item.category) + '</span>' : '') +
-            (item.year ? '<span>Año ' + escapeHtml(item.year) + '</span>' : '') +
-        '</div>' +
-        ((item.related || []).length
-            ? '<details><summary>Documentos relacionados (' + item.related.length + ')</summary><ul>' +
-              item.related.map(function (r) {
-                  return '<li><a href="' + escapeHtml(r.url) + '" target="' +
-                      escapeHtml(r.target || '_self') + '" rel="noopener">' +
-                      escapeHtml(r.nombre) + '</a></li>';
-              }).join('') + '</ul></details>'
-            : '') +
-        (item.url && item.url !== '#'
-            ? '<a href="' + escapeHtml(item.url) + '" target="' + escapeHtml(item.target || '_self') + '" rel="noopener" class="dges-btn-open">Descargar ' + escapeHtml(item.type) + '</a>'
-            : '') +
-        '</article>';
-}
-
-export function setStatus(el, text, hidden) {
+export function setStatus(el, text, hidden = false) {
     if (!el) return;
+
     el.textContent = text || '';
-    el.style.display = hidden ? 'none' : '';
+    el.hidden = !!hidden || !text;
 }
 
-export function updateLoadMore(btn, hasMore, loading, i18n) {
-    if (!btn) return;
-    btn.hidden = !hasMore;
-    btn.disabled = !!loading;
-    btn.textContent = loading
+export function updateLoadMore(link, state, i18n) {
+    if (!link) return;
+
+    link.hidden = !state.hasMore;
+    link.textContent = state.loading
         ? (i18n.loadingMore || 'Cargando más…')
         : (i18n.loadMore || 'Ver más');
+    link.setAttribute('aria-disabled', state.loading ? 'true' : 'false');
+    link.href = pageUrl(state, state.page + 1);
+}
+
+export function updateClearButtons(root, state) {
+    const clearSearch = root.querySelector('[data-clear-search]');
+    const clearFilters = root.querySelector('.dges-search-bar [data-clear-filters]');
+
+    if (clearSearch) clearSearch.hidden = !state.search;
+    if (clearFilters) clearFilters.hidden = !(state.search || state.category);
+}
+
+export function setLoading(root, loading) {
+    root.classList.toggle('is-loading', !!loading);
+    root.setAttribute('aria-busy', loading ? 'true' : 'false');
+}
+
+export function showEmpty(root, message, i18n) {
+    const empty = root.querySelector('[data-empty]');
+    const results = root.querySelector('[data-results]');
+    const status = root.querySelector('[data-status]');
+
+    if (empty) {
+        empty.hidden = false;
+        const paragraph = empty.querySelector('p');
+        if (paragraph) paragraph.textContent = message;
+
+        const clear = empty.querySelector('[data-clear-filters]');
+        if (clear) clear.textContent = i18n.clearFilters || 'Limpiar filtros';
+    }
+
+    if (results) results.hidden = true;
+    setStatus(status, '', true);
+}
+
+export function hideEmpty(root) {
+    const empty = root.querySelector('[data-empty]');
+    const results = root.querySelector('[data-results]');
+
+    if (empty) empty.hidden = true;
+    if (results) results.hidden = false;
+}
+
+export function showError(root, message, i18n, hideResults = false) {
+    const error = root.querySelector('[data-error]');
+    const empty = root.querySelector('[data-empty]');
+    const results = root.querySelector('[data-results]');
+
+    if (error) {
+        error.hidden = false;
+        const paragraph = error.querySelector('p');
+        if (paragraph) paragraph.textContent = message;
+
+        const retry = error.querySelector('[data-retry]');
+        if (retry) retry.textContent = i18n.retry || 'Reintentar';
+    }
+
+    if (empty) empty.hidden = true;
+    if (hideResults && results) results.hidden = true;
+}
+
+export function hideError(root) {
+    const error = root.querySelector('[data-error]');
+    if (error) error.hidden = true;
+}
+
+export function statusText(state, i18n) {
+    if (state.total < 1) return '';
+
+    const total = formatNumber(state.total);
+    const count = formatNumber(state.count);
+
+    if (state.count >= state.total) {
+        return sprintf(state.total === 1 ? i18n.documentsOne : i18n.documentsMany, total);
+    }
+
+    return sprintf(
+        state.total === 1 ? i18n.showingOne : i18n.showingMany,
+        count,
+        total
+    );
+}
+
+export function emptyMessage(state, currentCategory, i18n) {
+    const search = (state.search || '').trim();
+    const category = (state.category || '').trim();
+
+    if (search && category) {
+        return sprintf(i18n.emptyBoth, search, currentCategory || category);
+    }
+    if (search) {
+        return sprintf(i18n.emptySearch, search);
+    }
+    if (category) {
+        return i18n.emptyCategory || 'No hay documentos en esta categoría.';
+    }
+
+    return i18n.emptyAll || 'Todavía no hay documentos disponibles.';
+}
+
+export function categoryLabel(root, state) {
+    const select = root.querySelector('[data-category]');
+
+    if (select && select.selectedIndex >= 0 && select.options[select.selectedIndex]) {
+        return select.options[select.selectedIndex].text.trim();
+    }
+
+    return state.category || '';
+}
+
+function formatNumber(value) {
+    try {
+        return new Intl.NumberFormat().format(value);
+    } catch (error) {
+        return String(value);
+    }
 }
