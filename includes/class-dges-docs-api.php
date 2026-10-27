@@ -1,7 +1,6 @@
 <?php
 /**
- * Clase encargada de la lógica de negocio, rastreo de enlaces (crawling) 
- * y filtrado de los documentos de la DGES.
+ * Fachada de compatibilidad. La lógica vive en Source/Repository/Query.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -9,143 +8,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class DGES_Docs_API {
+
     const OPTION_URL = 'dges_documentos_source_url';
-    const CACHE_KEY = 'dges_documentos_api_json_v2';
-    const CACHE_TTL = HOUR_IN_SECONDS;
+    const CACHE_KEY  = 'dges_docs_index_v3';
 
     public static function default_url() {
-        // URL por defecto apuntando a la nueva API oficial de la DGES
-        return 'https://bd.dges-cba.edu.ar/bd_dges/modulos/documentos/operaciones/list_documentos.php';
+        return DGES_Docs_Source::default_url();
     }
 
     public static function get_source_url() {
-        return esc_url_raw(get_option(self::OPTION_URL, self::default_url()));
+        return DGES_Docs_Source::get_source_url();
     }
 
     public static function clear_cache() {
-        delete_transient(self::CACHE_KEY);
-    }
-
-      public static function get_documents($force_refresh = false) {
-        if (!$force_refresh) {
-            $cached = get_transient(self::CACHE_KEY);
-            if (is_array($cached)) {
-                return $cached;
-            }
-        }
-
-        $url = self::get_source_url();
-        $response = wp_safe_remote_get($url, array('timeout' => 20));
-
-        if (is_wp_error($response)) {
-            return $response;
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if (!is_array($data) || !isset($data['documentos'])) {
-            return new WP_Error('dges_api_error', 'No se pudo obtener el listado de documentos.');
-        }
-
-        $items = $data['documentos'];
-        $mapped_items = array();
-
-        foreach ($items as $item) {
-            // Manejo de la categoría
-            $cat_nombre = '';
-            if (!empty($item['categorias']) && is_array($item['categorias'])) {
-                $cat_nombre = isset($item['categorias'][0]['nombre']) ? $item['categorias'][0]['nombre'] : '';
-            }
-
-            // Manejo del archivo principal (URL y Tipo)
-            $url_archivo = '#';
-            $tipo_archivo = 'PDF'; // por defecto
-            if (!empty($item['archivos']) && is_array($item['archivos'])) {
-                $archivo = $item['archivos'][0];
-                $tipo_archivo = isset($archivo['tipo']) ? strtoupper($archivo['tipo']) : 'PDF';
-                // Armamos la URL ficticia para probar (en producción usarías la carpeta real)
-                if (isset($archivo['nombre_archivo'])) {
-                    $url_archivo = 'https://bd.dges-cba.edu.ar/bd_dges/archivos/' . (isset($archivo['carpeta']) ? $archivo['carpeta'] : '') . '/' . $archivo['nombre_archivo'];
-                }
-            }
-
-            $mapped_items[] = array(
-                'id'          => isset($item['id']) ? $item['id'] : '',
-                'title'       => isset($item['nombre']) ? $item['nombre'] : '',
-                'description' => isset($item['observacion']) ? $item['observacion'] : '',
-                'year'        => isset($item['anio']) ? $item['anio'] : '',
-                // Mes y número se usan solo para ordenar (ver sort_documents).
-                'month'       => isset($item['mes']) ? absint($item['mes']) : 0,
-                'doc_number'  => isset($item['numero']) ? (string) $item['numero'] : '',
-                'category'    => $cat_nombre,
-                'type'        => $tipo_archivo, // Ahora dice "PDF" o "XLSX" real
-                'url'         => $url_archivo,
-                'target'      => '_blank',
-                'destacado'   => (isset($item['destacado']) && $item['destacado'] === 'Si'),
-                'related'     => isset($item['documentos_relacionados']) ? $item['documentos_relacionados'] : array()
-            );
-        }
-
-        set_transient(self::CACHE_KEY, $mapped_items, self::CACHE_TTL);
-        return $mapped_items;
-    }
-
-    public static function filter_documents($items, $args) {
-        $txtbusqueda = self::normalize_text(isset($args['txtbusqueda']) ? $args['txtbusqueda'] : '');
-        $categoria_filtro = self::normalize_text(isset($args['categoria']) ? $args['categoria'] : '');
-        $anio_filtro = absint(isset($args['anio']) ? $args['anio'] : 0);
-        
-        return self::sort_documents(array_filter($items, function ($item) use ($txtbusqueda, $categoria_filtro, $anio_filtro) {
-            
-            // 1. Filtrar por Año (comparando ambos como string)
-            if ($anio_filtro && (string) $item['year'] !== (string) $anio_filtro) {
-                return false;
-            }
-
-            // 2. Filtrar por Categoría
-            if ($categoria_filtro) {
-                if (strpos(self::normalize_text($item['category']), $categoria_filtro) === false) {
-                    return false;
-                }
-            }
-
-            // 3. Filtrar por Texto
-            if ($txtbusqueda) {
-                $haystack = self::normalize_text($item['title'] . ' ' . $item['description']);
-                if (strpos($haystack, $txtbusqueda) === false) {
-                    return false;
-                }
-            }
-
-            return true;
-        }));
+        DGES_Docs_Repository::clear_all();
     }
 
     /**
-     * Ordena de más nuevo a más viejo: año, mes y número (de mayor a menor),
-     * y por último el título. Los documentos sin año quedan al final.
-     * Se ordena antes de paginar, así el orden vale para todas las páginas.
+     * @param bool $force_refresh
+     * @return array|WP_Error
      */
-    public static function sort_documents($items) {
-        usort($items, function ($a, $b) {
-            $keys = array('year', 'month', 'doc_number');
-            foreach ($keys as $key) {
-                $value_a = isset($a[$key]) ? (int) $a[$key] : 0;
-                $value_b = isset($b[$key]) ? (int) $b[$key] : 0;
-                if ($value_a !== $value_b) {
-                    return $value_b <=> $value_a;
-                }
-            }
-            $title_a = isset($a['title']) ? (string) $a['title'] : '';
-            $title_b = isset($b['title']) ? (string) $b['title'] : '';
-            return strnatcasecmp($title_a, $title_b);
-        });
-        return $items;
+    public static function get_documents( $force_refresh = false ) {
+        $repo = new DGES_Docs_Index_Repository();
+
+        return $repo->all( (bool) $force_refresh );
     }
 
-    private static function normalize_text($value) {
-        $value = remove_accents(wp_strip_all_tags((string) $value));
-        return strtolower(trim(preg_replace('/\s+/', ' ', $value)));
+    /**
+     * Compatibilidad con el orden por fecha que agregó dev.
+     */
+    public static function sort_documents( $items ) {
+        return DGES_Docs_Query::sort( $items );
+    }
+
+    public static function filter_documents( $items, $args ) {
+        return DGES_Docs_Query::sort( DGES_Docs_Query::filter( $items, $args ) );
     }
 }
