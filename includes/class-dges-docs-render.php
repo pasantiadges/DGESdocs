@@ -155,7 +155,10 @@ class DGES_Docs_Render {
             $items = array();
         }
 
-        $output  = '<section class="dges-documentos dges-destacados-section">';
+        $count  = count( $items );
+        $layout = 0 === $count ? 'is-empty' : ( 1 === $count ? 'is-single' : ( 2 === $count ? 'is-pair' : 'is-featured-grid' ) );
+
+        $output  = '<section class="dges-documentos dges-destacados-section ' . esc_attr( $layout ) . '">';
         $output .= '<h2>' . esc_html( $title ) . '</h2>';
         $output .= '<div class="dges-documentos-results">';
 

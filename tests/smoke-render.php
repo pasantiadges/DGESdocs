@@ -176,6 +176,14 @@ smoke_check( 'card no muestra insignia de tipo', false === strpos( $card, 'dges-
 smoke_check( 'single no muestra insignia de tipo', false === strpos( $multi_single, 'dges-document-type' ), $multi_single );
 smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_detail, '>Cuarta<' ) && false !== strpos( $multi_detail, 'dges-card-tag is-main">Primera' ), $multi_detail );
 
+$featured_one   = DGES_Docs_Render::shortcode_destacados( array( $item ), 'Destacados' );
+$featured_two   = DGES_Docs_Render::shortcode_destacados( array( $item, $multi ), 'Destacados' );
+$featured_three = DGES_Docs_Render::shortcode_destacados( array( $item, $multi, $item ), 'Destacados' );
+
+smoke_check( 'destacados con una card usa is-single', false !== strpos( $featured_one, 'is-single' ), $featured_one );
+smoke_check( 'destacados con dos cards usa is-pair', false !== strpos( $featured_two, 'is-pair' ), $featured_two );
+smoke_check( 'destacados con tres cards usa is-featured-grid', false !== strpos( $featured_three, 'is-featured-grid' ), $featured_three );
+
 $detail_raw = array(
     'id'          => '116',
     'nombre'      => 'Resolución Ministerial 116-2026',
