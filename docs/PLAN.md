@@ -53,7 +53,7 @@ Estas seis decisiones son el rumbo acordado, pero **pueden cambiar**. Si cambian
 - [x] Detalle server-rendered: breadcrumb, metadata, archivos, relacionados y volver.
 - [x] SEO del detalle: title, meta description, canonical, OG/Twitter, JSON-LD `DigitalDocument`, 404 real y `noindex`.
 - [x] REST `/documents/{id}` con archivos y relacionados; las cards del listado ya linkean al detalle.
-- [x] 158 tests con stubs (`tests/`).
+- [x] 160 tests con stubs (`tests/`).
 - [x] Probado en el sitio local con WordPress en ejecución.
 - [ ] Probar contra la API real en producción.
 - [ ] “Copiar shortcode” en el admin (Fase 3).

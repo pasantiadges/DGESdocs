@@ -168,6 +168,7 @@ smoke_check( 'card muestra número', false !== strpos( $card, 'N° 116' ), $card
 smoke_check( 'card linkea al detalle', false !== strpos( $card, 'href="https://example.test/documentos/documento/116/"' ), $card );
 smoke_check( 'card muestra Ver documento', false !== strpos( $card, 'Ver documento' ), $card );
 smoke_check( 'card usa tags de categoría', false !== strpos( $card, 'dges-card-tags' ), $card );
+smoke_check( 'card de listado tiene contexto', false !== strpos( $card, 'dges-card--list' ), $card );
 smoke_check( 'card limita a 3 tags y agrega +1', false !== strpos( $multi_card, '+1' ) && false === strpos( $multi_card, '>Cuarta<' ), $multi_card );
 smoke_check( 'card usa iniciales y tooltip', false !== strpos( $multi_card, 'title="Primera"' ) && false !== strpos( $multi_card, '>PRI<' ), $multi_card );
 smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card, 'dges-card-tag is-main" title="Primera" aria-label="Primera">PRI' ), $multi_card );
@@ -277,6 +278,7 @@ $html = DGES_Docs_Render::shortcode_buscador(
 );
 
 smoke_check( 'shortcode tiene data-dges-documentos', false !== strpos( $html, 'data-dges-documentos' ), $html );
+smoke_check( 'shortcode listado tiene clase de sección', false !== strpos( $html, 'dges-list-section' ), $html );
 smoke_check( 'shortcode conserva búsqueda', false !== strpos( $html, 'value="116"' ), $html );
 smoke_check( 'shortcode selecciona categoría', false !== strpos( $html, '<option value="1" selected="selected">' ), $html );
 smoke_check( 'shortcode muestra estado', false !== strpos( $html, '1 documento' ), $html );

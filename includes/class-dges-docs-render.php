@@ -51,7 +51,7 @@ class DGES_Docs_Render {
         $count  = count( $items );
         $total  = (int) $pagination['total'];
 
-        $html  = '<section class="dges-documentos" data-dges-documentos'
+        $html  = '<section class="dges-documentos dges-list-section" data-dges-documentos'
             . ' data-initial-search="' . esc_attr( $search ) . '"'
             . ' data-initial-category="' . esc_attr( $category ) . '"'
             . ' data-initial-page="' . esc_attr( (int) $pagination['page'] ) . '"'
@@ -231,7 +231,7 @@ class DGES_Docs_Render {
                 : __( 'Ver documento', 'dges-documentos' );
         }
 
-        $classes = 'dges-document-card';
+        $classes = 'dges-document-card dges-card--' . sanitize_html_class( $args['context'] );
         if ( ! empty( $args['class'] ) ) {
             $extra_classes = preg_split( '/\s+/', trim( (string) $args['class'] ) );
 
