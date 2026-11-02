@@ -17,6 +17,7 @@ class DGES_Docs_Plugin {
 
         add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
         add_filter( 'script_loader_tag', array( __CLASS__, 'module_script_tag' ), 10, 2 );
+        add_action( 'init', array( 'DGES_Docs_Source', 'maybe_migrate_fixture_url' ), 7 );
         add_action( 'init', array( __CLASS__, 'maybe_schedule_cron' ) );
         add_action( DGES_Docs_Repository::CRON_HOOK, array( 'DGES_Docs_Repository', 'cron_refresh' ) );
         add_action( DGES_Docs_Repository::CRON_NOW_HOOK, array( 'DGES_Docs_Repository', 'cron_refresh' ) );

@@ -202,6 +202,12 @@ $monthly = array(
 );
 check_same( array( 'a', 'b', 'c' ), array_column( DGES_Docs_Query::sort( $monthly ), 'id' ), 'orden por año y mes desc antes que número' );
 
+// Fechas de la API.
+check_same( '2026-10-18', DGES_Docs_Source::normalize_date( '2026-10-18' ), 'fecha Y-m-d de la API' );
+check_same( '', DGES_Docs_Source::normalize_date( '0000-00-00' ), 'fecha cero se descarta' );
+check_same( '2026-10-18', DGES_Docs_Source::normalize_date( '18-10-2026' ), 'fecha del ejemplo invertida se normaliza' );
+check_same( 'Segunda', DGES_Docs_Source::first_category_name( array( array( 'name' => '' ), array( 'name' => 'Segunda' ) ) ), 'categoría principal salta vacías' );
+
 // Categorías.
 $cats = DGES_Docs_Query::categories( $items );
 check_same( 2, count( $cats ), 'categorías únicas' );

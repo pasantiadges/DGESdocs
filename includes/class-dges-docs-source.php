@@ -11,6 +11,7 @@ class DGES_Docs_Source {
 
     const OPTION_URL        = 'dges_documentos_source_url';
     const OPTION_FILES_BASE = 'dges_documentos_files_base';
+    const OPTION_MIGRATED   = 'dges_documentos_api_source_migrated';
     const TIMEOUT           = 15;
 
     /** @var int|null Total informado por la API, si viene. */
@@ -26,6 +27,78 @@ class DGES_Docs_Source {
 
     public static function get_files_base() {
         return esc_url_raw( get_option( self::OPTION_FILES_BASE, '' ) );
+    }
+
+    /**
+     * Migración única: el sitio local tenía guardado el fixture de demo.
+     * Al actualizar, pasa a la URL real de la API y limpia el índice.
+     */
+    public static function maybe_migrate_fixture_url() {
+        if ( get_option( self::OPTION_MIGRATED ) ) {
+            return;
+        }
+
+        $saved = (string) get_option( self::OPTION_URL, '' );
+
+        if ( '' !== $saved && false !== strpos( $saved, 'assets/documentos.json' ) ) {
+            update_option( self::OPTION_URL, self::default_url() );
+
+            if ( class_exists( 'DGES_Docs_Repository' ) ) {
+                DGES_Docs_Repository::clear_all();
+            }
+        }
+
+        update_option( self::OPTION_MIGRATED, 1, false );
+    }
+
+    /**
+     * Normaliza la fecha del documento. La API manda Y-m-d; el ejemplo
+     * del Drive está al revés (d-m-Y), así que aceptamos ambos.
+     * "0000-00-00" se considera vacía.
+     */
+    public static function normalize_date( $value ) {
+        $value = trim( (string) $value );
+
+        if ( '' === $value || '0000-00-00' === $value || '0000-00-00 00:00:00' === $value ) {
+            return '';
+        }
+
+        if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})/', $value, $m ) ) {
+            $year  = (int) $m[1];
+            $month = (int) $m[2];
+            $day   = (int) $m[3];
+
+            return checkdate( $month, $day, $year ) ? sprintf( '%04d-%02d-%02d', $year, $month, $day ) : '';
+        }
+
+        if ( preg_match( '/^(\d{2})-(\d{2})-(\d{4})$/', $value, $m ) ) {
+            $day   = (int) $m[1];
+            $month = (int) $m[2];
+            $year  = (int) $m[3];
+
+            return checkdate( $month, $day, $year ) ? sprintf( '%04d-%02d-%02d', $year, $month, $day ) : '';
+        }
+
+        $timestamp = strtotime( $value );
+
+        return false === $timestamp ? '' : gmdate( 'Y-m-d', $timestamp );
+    }
+
+    /**
+     * Primera categoría con nombre no vacío. Es la categoría principal.
+     */
+    public static function first_category_name( $categories ) {
+        if ( ! is_array( $categories ) ) {
+            return '';
+        }
+
+        foreach ( $categories as $category ) {
+            if ( ! empty( $category['name'] ) ) {
+                return (string) $category['name'];
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -262,6 +335,7 @@ class DGES_Docs_Source {
         }
 
         $body = trim( (string) wp_remote_retrieve_body( $response ) );
+
         $data = json_decode( $body, true );
 
         if ( null === $data && JSON_ERROR_NONE !== json_last_error() ) {
@@ -350,8 +424,9 @@ class DGES_Docs_Source {
             'number'        => $number,
             'year'          => $year,
             'month'         => isset( $raw['mes'] ) ? absint( $raw['mes'] ) : 0,
+            'date'          => self::normalize_date( isset( $raw['fecha'] ) ? $raw['fecha'] : '' ),
             'categories'    => $categories,
-            'category'      => ! empty( $categories[0]['name'] ) ? $categories[0]['name'] : '',
+            'category'      => self::first_category_name( $categories ),
             'document_type' => $document_type,
             'featured'      => $featured,
             'current'       => $current,
@@ -503,7 +578,7 @@ class DGES_Docs_Source {
                 'featured'      => self::is_yes( isset( $rel['destacado'] ) ? $rel['destacado'] : ( isset( $rel['destacada'] ) ? $rel['destacada'] : false ) ),
                 'current'       => array_key_exists( 'vigente', $rel ) && is_scalar( $rel['vigente'] ) && '' !== trim( (string) $rel['vigente'] ) ? self::is_yes( $rel['vigente'] ) : true,
                 'categories'    => $categories,
-                'category'      => ! empty( $categories[0]['name'] ) ? $categories[0]['name'] : '',
+                'category'      => self::first_category_name( $categories ),
                 'document_type' => self::infer_document_type( $title ),
                 'file_type'     => '',
                 'file_size'     => 0,
