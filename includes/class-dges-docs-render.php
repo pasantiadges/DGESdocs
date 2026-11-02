@@ -242,21 +242,23 @@ class DGES_Docs_Render {
             $classes .= ' is-not-current';
         }
 
-        $html  = '<article class="' . esc_attr( $classes ) . '" data-document-id="' . esc_attr( isset( $item['id'] ) ? $item['id'] : '' ) . '">';
-        $html .= '<div class="dges-card-header">';
-        $html .= '<span class="dges-document-type">' . esc_html( $type ) . '</span>';
+        $badges = '';
 
         if ( $featured ) {
-            $html .= '<span class="dges-badge-destacado">' . esc_html__( '★ Destacado', 'dges-documentos' ) . '</span>';
+            $badges .= '<span class="dges-badge-destacado">' . esc_html__( '★ Destacado', 'dges-documentos' ) . '</span>';
         }
         if ( '' !== $relation && 'related' === $args['context'] ) {
-            $html .= '<span class="dges-badge-relation">' . esc_html( $relation ) . '</span>';
+            $badges .= '<span class="dges-badge-relation">' . esc_html( $relation ) . '</span>';
         }
         if ( ! $current ) {
-            $html .= '<span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span>';
+            $badges .= '<span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span>';
         }
 
-        $html .= '</div>';
+        $html  = '<article class="' . esc_attr( $classes ) . '" data-document-id="' . esc_attr( isset( $item['id'] ) ? $item['id'] : '' ) . '">';
+
+        if ( '' !== $badges ) {
+            $html .= '<div class="dges-card-header">' . $badges . '</div>';
+        }
 
         if ( '' !== $href ) {
             $html .= '<h3><a href="' . esc_url( $href ) . '"' . ( $external ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>' . esc_html( $title ) . '</a></h3>';
@@ -268,7 +270,7 @@ class DGES_Docs_Render {
             $html .= '<p>' . esc_html( wp_trim_words( $description, 28, '…' ) ) . '</p>';
         }
 
-        $html .= self::category_tags_html( $categories, $category, 3 );
+        $html .= self::category_tags_html( $categories, $category, 3, 'dges-card-tags', true );
 
         if ( $args['show_meta'] ) {
             $meta = array();
@@ -297,7 +299,7 @@ class DGES_Docs_Render {
     /**
      * Etiquetas de categorías. En cards se limita la cantidad y se agrega +N.
      */
-    private static function category_tags_html( $categories, $main, $max = 3, $class = 'dges-card-tags' ) {
+    private static function category_tags_html( $categories, $main, $max = 3, $class = 'dges-card-tags', $short = false ) {
         if ( ! is_array( $categories ) ) {
             return '';
         }
@@ -342,7 +344,10 @@ class DGES_Docs_Render {
                 $tag_class .= ' is-main';
             }
 
-            $html .= '<span class="' . esc_attr( $tag_class ) . '">' . esc_html( $name ) . '</span>';
+            $label = $short ? self::category_initials( $name ) : $name;
+            $attrs = $short ? ' title="' . esc_attr( $name ) . '" aria-label="' . esc_attr( $name ) . '"' : '';
+
+            $html .= '<span class="' . esc_attr( $tag_class ) . '"' . $attrs . '>' . esc_html( $label ) . '</span>';
         }
 
         if ( ! empty( $remaining ) ) {
@@ -355,8 +360,50 @@ class DGES_Docs_Render {
     }
 
     /**
+     * Iniciales para el tag de categoría en cards. El nombre completo va en title.
+     */
+    private static function category_initials( $name ) {
+        $name = function_exists( 'remove_accents' ) ? remove_accents( (string) $name ) : (string) $name;
+        $name = trim( preg_replace( '/[^A-Za-z0-9]+/', ' ', $name ) );
+
+        if ( '' === $name ) {
+            return '';
+        }
+
+        $words     = preg_split( '/\s+/', $name );
+        $stopwords = array( 'de', 'del', 'la', 'las', 'el', 'los', 'y', 'e', 'en', 'para', 'por', 'con', 'sin', 'al', 'a' );
+        $filtered  = array();
+
+        foreach ( $words as $word ) {
+            if ( '' === $word ) {
+                continue;
+            }
+            if ( count( $words ) > 1 && in_array( strtolower( $word ), $stopwords, true ) ) {
+                continue;
+            }
+            $filtered[] = $word;
+        }
+
+        if ( empty( $filtered ) ) {
+            $filtered = $words;
+        }
+
+        $initials = '';
+
+        foreach ( $filtered as $word ) {
+            $initials .= strtoupper( substr( $word, 0, 1 ) );
+        }
+
+        if ( strlen( $initials ) < 2 && 1 === count( $filtered ) ) {
+            return strtoupper( substr( $filtered[0], 0, 3 ) );
+        }
+
+        return substr( $initials, 0, 3 );
+    }
+
+    /**
      * Card breve de un solo documento para el shortcode [dges_documento].
-     * Insignia + título + una línea de descripción + acción.
+     * Título + una línea de descripción + acción.
      */
     public static function single_document( $item, $args = array() ) {
         if ( ! is_array( $item ) ) {
@@ -389,11 +436,6 @@ class DGES_Docs_Render {
 
         if ( '' === $category ) {
             $category = DGES_Docs_Source::first_category_name( $categories );
-        }
-
-        $type = ! empty( $item['document_type'] ) ? (string) $item['document_type'] : $file_type;
-        if ( '' === $type ) {
-            $type = __( 'Documento', 'dges-documentos' );
         }
 
         $detail_url = self::detail_url( isset( $item['id'] ) ? $item['id'] : '' );
@@ -458,14 +500,11 @@ class DGES_Docs_Render {
 
         $html  = '<div class="dges-documentos dges-documento-single dges-documento-single--' . esc_attr( $variant ) . '">';
         $html .= '<article class="' . esc_attr( $classes ) . '" data-document-id="' . esc_attr( isset( $item['id'] ) ? $item['id'] : '' ) . '">';
-        $html .= '<div class="dges-card-header">';
-        $html .= '<span class="dges-document-type">' . esc_html( $type ) . '</span>';
 
         if ( ! $current ) {
-            $html .= '<span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span>';
+            $html .= '<div class="dges-card-header"><span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span></div>';
         }
 
-        $html .= '</div>';
         $html .= '<h3>' . esc_html( $title ) . '</h3>';
 
         if ( self::to_bool( $args['show_description'] ) && '' !== $description ) {
@@ -473,7 +512,7 @@ class DGES_Docs_Render {
         }
 
         if ( self::to_bool( $args['show_meta'] ) ) {
-            $html .= self::category_tags_html( $categories, $category, 2, 'dges-card-tags dges-single-tags' );
+            $html .= self::category_tags_html( $categories, $category, 2, 'dges-card-tags dges-single-tags', true );
         }
 
         $html .= '<div class="dges-single-footer">';

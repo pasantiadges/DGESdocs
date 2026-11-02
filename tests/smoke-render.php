@@ -169,8 +169,11 @@ smoke_check( 'card linkea al detalle', false !== strpos( $card, 'href="https://e
 smoke_check( 'card muestra Ver documento', false !== strpos( $card, 'Ver documento' ), $card );
 smoke_check( 'card usa tags de categoría', false !== strpos( $card, 'dges-card-tags' ), $card );
 smoke_check( 'card limita a 3 tags y agrega +1', false !== strpos( $multi_card, '+1' ) && false === strpos( $multi_card, '>Cuarta<' ), $multi_card );
-smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card, 'dges-card-tag is-main">Primera' ), $multi_card );
+smoke_check( 'card usa iniciales y tooltip', false !== strpos( $multi_card, 'title="Primera"' ) && false !== strpos( $multi_card, '>PRI<' ), $multi_card );
+smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card, 'dges-card-tag is-main" title="Primera" aria-label="Primera">PRI' ), $multi_card );
 smoke_check( 'single limita a 2 tags y agrega +2', false !== strpos( $multi_single, '+2' ) && false === strpos( $multi_single, '>Tercera<' ), $multi_single );
+smoke_check( 'card no muestra insignia de tipo', false === strpos( $card, 'dges-document-type' ), $card );
+smoke_check( 'single no muestra insignia de tipo', false === strpos( $multi_single, 'dges-document-type' ), $multi_single );
 smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_detail, '>Cuarta<' ) && false !== strpos( $multi_detail, 'dges-card-tag is-main">Primera' ), $multi_detail );
 
 $detail_raw = array(
