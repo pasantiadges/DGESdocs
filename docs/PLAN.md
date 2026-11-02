@@ -38,7 +38,7 @@ Estas seis decisiones son el rumbo acordado, pero **pueden cambiar**. Si cambian
 
 ## Estado de implementación (25/10)
 
-**Fases 1 y 2 implementadas y probadas en el WordPress local**, pendiente la API real en producción:
+**Fases 1 y 2 implementadas y probadas contra la API real de prueba**, pendiente producción:
 
 - [x] `Source` con HTTP, mapeo, tipos, número/año, archivos y relacionados.
 - [x] `Query` con búsqueda AND, categoría, orden y paginación.
@@ -53,7 +53,7 @@ Estas seis decisiones son el rumbo acordado, pero **pueden cambiar**. Si cambian
 - [x] Detalle server-rendered: breadcrumb, metadata, archivos, relacionados y volver.
 - [x] SEO del detalle: title, meta description, canonical, OG/Twitter, JSON-LD `DigitalDocument`, 404 real y `noindex`.
 - [x] REST `/documents/{id}` con archivos y relacionados; las cards del listado ya linkean al detalle.
-- [x] 143 tests con stubs (`tests/`).
+- [x] 152 tests con stubs (`tests/`).
 - [x] Probado en el sitio local con WordPress en ejecución.
 - [ ] Probar contra la API real en producción.
 - [ ] “Copiar shortcode” en el admin (Fase 3).
@@ -436,12 +436,12 @@ Estimación gruesa para 1 dev full-time; no incluye tiempos de espera del back.
 ### Fase 0 — Acordar contrato y mock (1–2 días)
 
 - Enviar [`API-CONTRACT.md`](API-CONTRACT.md) al back.
-- Cerrar P0/P1; actualizar el fixture `assets/documentos.json` con el contrato final.
+- Cerrar P0/P1; contrastar el contrato con la API real y dejar los hallazgos en [`API-CONTRACT.md`](API-CONTRACT.md).
 - Confirmar las decisiones preliminares (URL, anexos, no vigentes, card, página principal, permisos) y si la vieja web se retira o convive.
 - Definir el modo de búsqueda inicial (`index`) y el flag para pasar a `api`.
 - Auditar la vieja web: cantidad por categoría, archivos múltiples, enlaces que son páginas y no archivos.
 
-**Salida:** contrato aprobado, fixture actualizado, lista de faltantes de migración.
+**Salida:** contrato aprobado, hallazgos de la API real documentados, lista de faltantes de migración.
 
 ### Fase 1 — Adaptador, caché, buscador y categoría (4–6 días)
 
@@ -640,6 +640,6 @@ No es el plan principal; es la red de seguridad.
 
 **A modificar:** `class-dges-docs-api.php`, `class-dges-docs-plugin.php`, `class-dges-docs-rest.php`, `class-dges-docs-render.php`, `class-dges-docs-settings.php`, `docs.js`, `api.js`, `events.js`, `render.js`, `state.js`, `utils.js`, `docs.css`, `dges-docs.php`, `README.md`.
 
-**Fixture:** `assets/documentos.json` (modo demo, actualizado al contrato).
+**API real:** el plugin ya apunta al endpoint de DGES; el fixture `assets/documentos.json` se retiró.
 
 **Documentos de este plan:** `docs/PLAN.md`, `docs/API-CONTRACT.md`.

@@ -252,7 +252,7 @@ No pedimos `vigente`, `anio` ni `tipo_documento` como filtros: se usan solo para
 1. ¿La URL de producción es la misma que la de prueba? ¿Requiere auth, token o rate limit?
 2. ¿El volumen real es 300–500? ¿Cuánto estiman en 3 años?
 3. ¿Todos los documentos de la vieja web (`dges-cba.infd.edu.ar/sitio/documentos/`) se migran a esta API? ¿Qué pasa con los que son páginas y no archivos?
-4. ¿Una categoría por documento o varias? ¿Los IDs de categoría son estables?
+4. Confirmado: un documento puede tener varias categorías. La primera no vacía es la principal. ¿El back garantiza al menos una?
 5. ¿`numero` es único por año? ¿Formato esperado (“116”, “116/2026”, “116-2026”)?
 6. ¿`vigente` y `destacado` van a ser booleanos o seguimos con “Si”/“No”?
 7. ¿`observacion` puede traer HTML o entidades (`&amp;`, `&nbsp;`)?
@@ -264,9 +264,19 @@ No pedimos `vigente`, `anio` ni `tipo_documento` como filtros: se usan solo para
 
 ---
 
-## 6. Compatibilidad
+## 6. Estado observado (31/10/2026)
+
+- Listado real: 6 documentos; `fecha` viene como `"0000-00-00"` en todos.
+- `categoria` y `anio` filtran bien; `list_categorias.php` responde con `id`/`nombre`.
+- `txtbusqueda` devuelve HTTP 200 con `Exterior-CarrInst-List_Carreras: Codigo3: Error Consultando BD.` (texto plano, no JSON).
+- `offset` no tiene efecto: `offset=1` devuelve los mismos 6 documentos; no hay `total`.
+- `archivos[]` no trae `url`; `https://bd.dges-cba.edu.ar/bd_dges/` + `archivos/...` da 404.
+- El detalle de `id=1` devuelve JSON inválido en `documentos_relacionados`: `"observacion":"sdad,"numero":"12"` (falta la coma separadora después del string). `json_decode` falla y el plugin cae al índice.
+- `iddocumento=999` devuelve texto plano HTTP 200 (`Codigo5: No se encontro el ID`), no un 404 JSON.
+
+## 7. Compatibilidad
 
 - El plugin actual ya consume `{"documentos":[...]}` y el detalle plano; se puede mantener.
 - Agregar campos no rompe; cambiar `id`/`destacado` en relacionados sí, pero el plugin lo normaliza mientras tanto.
 - Si se agrega un prefijo de versión (`/v1/`), avisar para actualizar la opción de URL del plugin.
-- Cualquier cambio de esquema debe reflejarse en este documento y en el fixture `assets/documentos.json`.
+- Cualquier cambio de esquema debe reflejarse en este documento y en el contrato real de la API.
