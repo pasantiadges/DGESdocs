@@ -2,7 +2,7 @@
 /**
  * Plugin Name: DGES - Documentos y Filtro Avanzado
  * Description: Importa los documentos de la DGES y los muestra con búsqueda por texto, filtro por categoría y detalle por documento.
- * Version: 1.5.6
+ * Version: 1.5.7
  * Author: DGES
  * Text Domain: dges-documentos
  * Requires at least: 6.0
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'DGES_DOCS_VERSION', '1.5.6' );
+define( 'DGES_DOCS_VERSION', '1.5.7' );
 define( 'DGES_DOCS_FILE', __FILE__ );
 define( 'DGES_DOCS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DGES_DOCS_URL', plugin_dir_url( __FILE__ ) );
