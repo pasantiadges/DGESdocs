@@ -270,7 +270,8 @@ class DGES_Docs_Render {
         }
 
         if ( $args['show_description'] && '' !== $description ) {
-            $html .= '<p>' . esc_html( wp_trim_words( $description, 28, '…' ) ) . '</p>';
+            // El recorte a 3 líneas con puntos suspensivos lo hace el CSS (line-clamp).
+            $html .= '<p>' . esc_html( $description ) . '</p>';
         }
 
         $html .= self::category_tags_html( $categories, $category, 3, 'dges-card-tags', true );
@@ -285,9 +286,8 @@ class DGES_Docs_Render {
                 $meta[] = '<span>' . sprintf( esc_html__( 'N° %s', 'dges-documentos' ), esc_html( $number ) ) . '</span>';
             }
 
-            if ( ! empty( $meta ) ) {
-                $html .= '<div class="dges-card-meta">' . implode( '', $meta ) . '</div>';
-            }
+            // Se imprime siempre para reservar la altura fija y alinear el botón en todas las cards.
+            $html .= '<div class="dges-card-meta">' . implode( '', $meta ) . '</div>';
         }
 
         if ( '' !== $href && '' !== $link_label ) {

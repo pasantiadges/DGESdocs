@@ -168,17 +168,22 @@
 }
 
 .dges-documento-single .dges-single-card h3 {
+    display: block;
+    -webkit-line-clamp: none;
+    overflow: visible;
+    min-height: 0;
     margin: 6px 0 8px;
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.3;
 }
 
-.dges-single-description {
+.dges-documento-single .dges-single-description {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
     overflow: hidden;
+    min-height: 0;
     margin: 0 0 14px;
     color: #4b5563;
     font-size: .92rem;
@@ -323,7 +328,8 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    margin-bottom: 8px;
+    min-height: 0;
+    margin-bottom: 10px;
 }
 
 .dges-document-type {
@@ -375,8 +381,13 @@
     letter-spacing: .2px;
 }
 
+/* Título: hasta dos líneas con puntos suspensivos. */
 .dges-document-card h3 {
-    margin: 8px 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0 0 8px;
     color: var(--dges-text);
     font-size: 1.15rem;
     font-weight: 700;
@@ -395,22 +406,32 @@
     text-decoration: underline;
 }
 
+/* Descripción: hasta tres líneas, con puntos suspensivos. Los tags siguen al
+   texto real y el espacio flexible queda abajo, antes de año/número y botón. */
 .dges-document-card p {
-    margin: 0 0 10px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    margin: 0 0 12px;
     color: #4b5563;
     font-size: .92rem;
     line-height: 1.55;
 }
 
+/* Año y número: fila con altura fija, apoyada abajo, sin línea divisoria. */
 .dges-card-meta {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 6px 14px;
+    min-height: 26px;
     margin-top: auto;
     padding-top: 10px;
-    border-top: 1px solid #e5edf7;
+    border-top: 0;
     color: #5b6b80;
     font-size: 12px;
+    line-height: 1.4;
 }
 
 .dges-card-tags {
@@ -418,6 +439,14 @@
     flex-wrap: wrap;
     gap: 5px;
     margin: 0 0 10px;
+}
+
+/* En las cards los tags van pegados a la descripción y en una sola fila. */
+.dges-document-card .dges-card-tags {
+    flex-wrap: nowrap;
+    min-height: 22px;
+    margin: 0;
+    overflow: hidden;
 }
 
 .dges-card-tag {
@@ -451,7 +480,7 @@
     color: #6b7280;
 }
 
-.dges-single-tags {
+.dges-documento-single .dges-single-tags {
     margin: 0 0 12px;
 }
 
@@ -479,50 +508,72 @@
     font-size: 12px;
 }
 
-/* Listado: medida fija y textos recortados con elipsis. */
-.dges-list-section .dges-documentos-results {
-    grid-template-columns: repeat(auto-fill, 320px);
-    justify-content: center;
+/* Listado: hasta 4 cards por fila y menos columnas a medida que se achica la pantalla. */
+.dges-list-section {
+    container-type: inline-size;
+    container-name: dges-list;
 }
 
+.dges-list-section .dges-documentos-results {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    justify-content: stretch;
+    gap: 20px;
+}
+
+/* Todas las cards del listado conservan el mismo alto. El año/número y el
+   botón quedan apoyados abajo; el espacio libre va entre los tags y esa fila. */
 .dges-list-section .dges-document-card {
     width: 100%;
-    height: 360px;
-    overflow: hidden;
+    min-height: 340px;
 }
 
-.dges-list-section .dges-document-card h3 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    min-height: 2.6em;
+@container dges-list (min-width: 500px) {
+    .dges-list-section .dges-documentos-results {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-.dges-list-section .dges-document-card p {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    min-height: 3.1em;
+@container dges-list (min-width: 760px) {
+    .dges-list-section .dges-documentos-results {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@container dges-list (min-width: 1020px) {
+    .dges-list-section .dges-documentos-results {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 }
 
 .dges-btn-open {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
     margin-top: 12px;
-    padding: 9px 12px;
-    border-radius: 6px;
-    background: #f0f0f1;
-    color: var(--dges-blue);
+    padding: 0 14px;
+    border-radius: 8px;
+    background: var(--dges-blue);
+    color: #fff;
     text-align: center;
     text-decoration: none;
     font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
     transition: background .2s ease, color .2s ease;
+}
+
+.dges-btn-open::after {
+    content: "\2192";
+    font-size: 1.05em;
+    line-height: 1;
 }
 
 .dges-btn-open:hover,
 .dges-btn-open:focus-visible {
-    background: var(--dges-blue);
+    background: var(--dges-blue-dark);
     color: #fff;
 }
 
@@ -651,7 +702,7 @@
 }
 
 .dges-destacados-section .dges-document-card h3 {
-    margin: 8px 0;
+    margin: 0 0 8px;
     font-size: 1.2rem;
     font-weight: 700;
     line-height: 1.3;
@@ -672,23 +723,41 @@
 }
 
 .dges-destacados-section.is-single .dges-document-card h3 {
+    display: block;
+    -webkit-line-clamp: none;
+    overflow: visible;
+    min-height: 0;
     margin: 10px 0 8px;
     font-size: clamp(1.55rem, 2vw, 1.9rem);
     line-height: 1.2;
 }
 
 .dges-destacados-section.is-single .dges-document-card p {
+    display: block;
+    -webkit-line-clamp: none;
+    overflow: visible;
+    min-height: 0;
     max-width: 75ch;
+    margin-bottom: 8px;
     color: #4b5563;
     font-size: 1rem;
     line-height: 1.6;
 }
 
+.dges-destacados-section.is-single .dges-card-tags {
+    margin-bottom: 0;
+}
+
 .dges-destacados-section.is-single .dges-card-meta {
+    margin-top: 12px;
     font-size: 12.5px;
 }
 
 .dges-destacados-section.is-single .dges-btn-open {
+    align-self: flex-start;
+    width: auto;
+    min-width: 220px;
+    padding: 0 22px;
     font-size: .95rem;
 }
 
@@ -906,6 +975,11 @@
         max-width: none;
     }
 
+    /* En columna, el flex-basis del campo se aplicaría como alto. */
+    .dges-search-field {
+        flex: 0 0 auto;
+    }
+
     .dges-search-submit {
         height: 44px;
     }
@@ -913,15 +987,6 @@
     .dges-documentos-results {
         grid-template-columns: 1fr;
         gap: 14px;
-    }
-
-    .dges-list-section .dges-documentos-results {
-        grid-template-columns: 1fr;
-    }
-
-    .dges-list-section .dges-document-card {
-        width: 100%;
-        height: 360px;
     }
 
     .dges-destacados-section {
