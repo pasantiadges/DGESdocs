@@ -574,46 +574,34 @@
 
 /* Destacados */
 .dges-destacados-section {
-    position: relative;
-    overflow: hidden;
-    padding: 28px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, #003d6e 0%, #004582 48%, #3b2f8f 100%);
-    box-shadow: 0 18px 40px rgba(0, 32, 80, .18);
-}
-
-.dges-destacados-section::after {
-    content: "";
-    position: absolute;
-    top: -120px;
-    right: -90px;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(245, 179, 1, .32), transparent 65%);
-    pointer-events: none;
+    padding: 32px 24px 30px;
+    border-radius: 12px;
+    background: #004582;
 }
 
 .dges-destacados-section h2 {
-    position: relative;
-    z-index: 1;
-    margin: 0 0 18px;
+    margin: 0 0 22px;
     color: #fff;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
+    letter-spacing: .5px;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 .dges-destacados-section .dges-documentos-results {
-    position: relative;
-    z-index: 1;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 320px));
+    justify-content: center;
     gap: 18px;
 }
 
 .dges-destacados-section .dges-document-card {
+    width: 100%;
+    max-width: 320px;
+    justify-self: center;
     padding: 18px;
-    border: 1px solid rgba(255, 255, 255, .38);
+    border: 0;
     border-top: 3px solid #f5b301;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, .18);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
 }
 
 .dges-destacados-section .dges-document-card:hover {
@@ -787,12 +775,6 @@
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-    .dges-destacados-section .dges-documentos-results {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 720px) {
     .dges-documentos {
         margin: 14px 0;
@@ -826,11 +808,12 @@
     }
 
     .dges-destacados-section {
-        padding: 18px;
-        border-radius: 14px;
+        padding: 22px 16px;
+        border-radius: 10px;
     }
 
     .dges-destacados-section h2 {
+        margin-bottom: 16px;
         font-size: 1.35rem;
     }
 
