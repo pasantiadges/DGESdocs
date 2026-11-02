@@ -146,6 +146,20 @@ $item     = DGES_Docs_Source::normalize_document( $raw, false );
 $card     = DGES_Docs_Render::card( $item, array( 'context' => 'list' ) );
 $category = array( array( 'id' => '1', 'name' => 'Normativas DGES', 'count' => 1 ) );
 
+$multi_raw = $raw;
+$multi_raw['id']         = '120';
+$multi_raw['nombre']     = 'Documento con cuatro categorías';
+$multi_raw['categorias'] = array(
+    array( 'idcategoria' => '10', 'nombre' => 'Primera' ),
+    array( 'idcategoria' => '11', 'nombre' => 'Segunda' ),
+    array( 'idcategoria' => '12', 'nombre' => 'Tercera' ),
+    array( 'idcategoria' => '13', 'nombre' => 'Cuarta' ),
+);
+$multi        = DGES_Docs_Source::normalize_document( $multi_raw, false );
+$multi_card   = DGES_Docs_Render::card( $multi, array( 'context' => 'list' ) );
+$multi_single = DGES_Docs_Render::single_document( $multi, array() );
+$multi_detail = DGES_Docs_Render::detail( $multi );
+
 smoke_check( 'card contiene clases base', false !== strpos( $card, 'dges-document-card' ), $card );
 smoke_check( 'card contiene título escapado', false !== strpos( $card, 'Resolución Ministerial 116-2026' ), $card );
 smoke_check( 'card muestra No vigente', false !== strpos( $card, 'No vigente' ), $card );
@@ -153,6 +167,11 @@ smoke_check( 'card muestra Destacado', false !== strpos( $card, 'Destacado' ), $
 smoke_check( 'card muestra número', false !== strpos( $card, 'N° 116' ), $card );
 smoke_check( 'card linkea al detalle', false !== strpos( $card, 'href="https://example.test/documentos/documento/116/"' ), $card );
 smoke_check( 'card muestra Ver documento', false !== strpos( $card, 'Ver documento' ), $card );
+smoke_check( 'card usa tags de categoría', false !== strpos( $card, 'dges-card-tags' ), $card );
+smoke_check( 'card limita a 3 tags y agrega +1', false !== strpos( $multi_card, '+1' ) && false === strpos( $multi_card, '>Cuarta<' ), $multi_card );
+smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card, 'dges-card-tag is-main">Primera' ), $multi_card );
+smoke_check( 'single limita a 2 tags y agrega +2', false !== strpos( $multi_single, '+2' ) && false === strpos( $multi_single, '>Tercera<' ), $multi_single );
+smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_detail, '>Cuarta<' ) && false !== strpos( $multi_detail, 'dges-card-tag is-main">Primera' ), $multi_detail );
 
 $detail_raw = array(
     'id'          => '116',

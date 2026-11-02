@@ -202,9 +202,14 @@ class DGES_Docs_Render {
         $number      = isset( $item['number'] ) ? (string) $item['number'] : '';
         $year        = isset( $item['year'] ) ? (int) $item['year'] : 0;
         $category    = ! empty( $item['category'] ) ? (string) $item['category'] : '';
+        $categories  = isset( $item['categories'] ) && is_array( $item['categories'] ) ? $item['categories'] : array();
         $featured    = ! empty( $item['featured'] );
         $current     = ! isset( $item['current'] ) || $item['current'];
         $relation    = isset( $item['relation'] ) ? (string) $item['relation'] : '';
+
+        if ( '' === $category ) {
+            $category = DGES_Docs_Source::first_category_name( $categories );
+        }
 
         $href       = '';
         $link_label = '';
@@ -263,12 +268,11 @@ class DGES_Docs_Render {
             $html .= '<p>' . esc_html( wp_trim_words( $description, 28, '…' ) ) . '</p>';
         }
 
+        $html .= self::category_tags_html( $categories, $category, 3 );
+
         if ( $args['show_meta'] ) {
             $meta = array();
 
-            if ( '' !== $category ) {
-                $meta[] = '<span>' . esc_html( $category ) . '</span>';
-            }
             if ( $year > 0 ) {
                 $meta[] = '<span>' . sprintf( esc_html__( 'Año %s', 'dges-documentos' ), esc_html( (string) $year ) ) . '</span>';
             }
@@ -286,6 +290,66 @@ class DGES_Docs_Render {
         }
 
         $html .= '</article>';
+
+        return $html;
+    }
+
+    /**
+     * Etiquetas de categorías. En cards se limita la cantidad y se agrega +N.
+     */
+    private static function category_tags_html( $categories, $main, $max = 3, $class = 'dges-card-tags' ) {
+        if ( ! is_array( $categories ) ) {
+            return '';
+        }
+
+        $names = array();
+        $seen  = array();
+
+        foreach ( $categories as $category ) {
+            if ( empty( $category['name'] ) ) {
+                continue;
+            }
+
+            $name = (string) $category['name'];
+            $key  = strtolower( $name );
+
+            if ( isset( $seen[ $key ] ) ) {
+                continue;
+            }
+
+            $seen[ $key ] = true;
+            $names[]      = $name;
+        }
+
+        if ( empty( $names ) ) {
+            return '';
+        }
+
+        $max       = max( 1, (int) $max );
+        $shown     = array_slice( $names, 0, $max );
+        $remaining = array_slice( $names, $max );
+
+        if ( '' === (string) $main ) {
+            $main = $names[0];
+        }
+
+        $html = '<div class="' . esc_attr( $class ) . '">';
+
+        foreach ( $shown as $name ) {
+            $tag_class = 'dges-card-tag';
+
+            if ( 0 === strcasecmp( $name, (string) $main ) ) {
+                $tag_class .= ' is-main';
+            }
+
+            $html .= '<span class="' . esc_attr( $tag_class ) . '">' . esc_html( $name ) . '</span>';
+        }
+
+        if ( ! empty( $remaining ) ) {
+            $html .= '<span class="dges-card-tag dges-card-tag--more" title="' . esc_attr( implode( ', ', $remaining ) ) . '">+' . esc_html( (string) count( $remaining ) ) . '</span>';
+        }
+
+        $html .= '</div>';
 
         return $html;
     }
@@ -319,15 +383,17 @@ class DGES_Docs_Render {
         $number      = isset( $item['number'] ) ? (string) $item['number'] : '';
         $year        = isset( $item['year'] ) ? (int) $item['year'] : 0;
         $category    = ! empty( $item['category'] ) ? (string) $item['category'] : '';
+        $categories  = isset( $item['categories'] ) && is_array( $item['categories'] ) ? $item['categories'] : array();
         $current     = ! isset( $item['current'] ) || $item['current'];
         $file_type   = ! empty( $item['file_type'] ) ? (string) $item['file_type'] : '';
+
+        if ( '' === $category ) {
+            $category = DGES_Docs_Source::first_category_name( $categories );
+        }
 
         $type = ! empty( $item['document_type'] ) ? (string) $item['document_type'] : $file_type;
         if ( '' === $type ) {
             $type = __( 'Documento', 'dges-documentos' );
-        }
-        if ( __( 'Documento', 'dges-documentos' ) === $type && '' !== $category ) {
-            $type = $category;
         }
 
         $detail_url = self::detail_url( isset( $item['id'] ) ? $item['id'] : '' );
@@ -406,6 +472,10 @@ class DGES_Docs_Render {
             $html .= '<p class="dges-single-description">' . esc_html( $description ) . '</p>';
         }
 
+        if ( self::to_bool( $args['show_meta'] ) ) {
+            $html .= self::category_tags_html( $categories, $category, 2, 'dges-card-tags dges-single-tags' );
+        }
+
         $html .= '<div class="dges-single-footer">';
         $html .= '<span class="dges-single-meta">' . esc_html( implode( ' · ', $meta ) ) . '</span>';
 
@@ -445,8 +515,13 @@ class DGES_Docs_Render {
         $number      = isset( $item['number'] ) ? (string) $item['number'] : '';
         $year        = isset( $item['year'] ) ? (int) $item['year'] : 0;
         $category    = ! empty( $item['category'] ) ? (string) $item['category'] : '';
+        $categories  = isset( $item['categories'] ) && is_array( $item['categories'] ) ? $item['categories'] : array();
         $type        = ! empty( $item['document_type'] ) ? (string) $item['document_type'] : ( ! empty( $item['file_type'] ) ? (string) $item['file_type'] : __( 'Documento', 'dges-documentos' ) );
         $featured    = ! empty( $item['featured'] );
+
+        if ( '' === $category ) {
+            $category = DGES_Docs_Source::first_category_name( $categories );
+        }
         $current     = ! isset( $item['current'] ) || $item['current'];
         $list_url    = DGES_Docs_Router::list_url();
         $back_url    = DGES_Docs_Router::back_url();
@@ -476,9 +551,6 @@ class DGES_Docs_Render {
         if ( '' !== $number || $year > 0 ) {
             $meta[] = trim( ( '' !== $number ? 'N° ' . $number : '' ) . ( '' !== $number && $year > 0 ? ' / ' : '' ) . ( $year > 0 ? (string) $year : '' ) );
         }
-        if ( '' !== $category ) {
-            $meta[] = $category;
-        }
 
         if ( ! empty( $meta ) ) {
             $html .= '<div class="dges-detail-meta">';
@@ -494,6 +566,15 @@ class DGES_Docs_Render {
 
         if ( '' !== $description ) {
             $html .= '<p class="dges-detail-description">' . esc_html( $description ) . '</p>';
+        }
+
+        $tags = self::category_tags_html( $categories, $category, 99, 'dges-card-tags dges-detail-categories' );
+
+        if ( '' !== $tags ) {
+            $html .= '<div class="dges-detail-categories-wrap">';
+            $html .= '<span class="dges-detail-categories-label">' . esc_html__( 'Categorías', 'dges-documentos' ) . '</span>';
+            $html .= $tags;
+            $html .= '</div>';
         }
 
         $html .= self::detail_files( $item );
