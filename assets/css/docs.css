@@ -640,58 +640,9 @@
     color: #fff;
 }
 
-/* Una sola destacada: ocupa el ancho y se vuelve una card horizontal. */
+/* Una sola destacada: misma card vertical, a ancho completo. */
 .dges-destacados-section.is-single .dges-documentos-results {
     display: block;
-}
-
-.dges-destacados-section.is-single .dges-document-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
-    grid-template-areas:
-        "badges tags"
-        "title tags"
-        "desc meta"
-        "desc action";
-    align-items: start;
-    column-gap: 28px;
-    row-gap: 6px;
-}
-
-.dges-destacados-section.is-single .dges-card-header {
-    grid-area: badges;
-}
-
-.dges-destacados-section.is-single h3 {
-    grid-area: title;
-    margin: 0;
-    font-size: 1.35rem;
-}
-
-.dges-destacados-section.is-single p {
-    grid-area: desc;
-    margin: 0 0 8px;
-}
-
-.dges-destacados-section.is-single .dges-card-tags {
-    grid-area: tags;
-    margin: 0;
-}
-
-.dges-destacados-section.is-single .dges-card-meta {
-    grid-area: meta;
-    align-self: end;
-    justify-self: start;
-    margin: 0;
-    padding: 0;
-    border: 0;
-}
-
-.dges-destacados-section.is-single .dges-btn-open {
-    grid-area: action;
-    align-self: start;
-    justify-self: start;
-    margin: 0;
 }
 
 /* Dos destacadas: dos columnas parejas. */
@@ -860,11 +811,6 @@
 
 /* Responsive */
 @media (max-width: 900px) {
-    .dges-destacados-section.is-single .dges-document-card {
-        grid-template-columns: minmax(0, 1fr) 220px;
-        column-gap: 18px;
-    }
-
     .dges-destacados-section.is-featured-grid .dges-documentos-results {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -918,30 +864,6 @@
 
     .dges-destacados-section .dges-documentos-results {
         grid-template-columns: 1fr;
-    }
-
-    .dges-destacados-section.is-single .dges-document-card {
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-    }
-
-    .dges-destacados-section.is-single h3 {
-        margin: 6px 0 8px;
-    }
-
-    .dges-destacados-section.is-single .dges-card-tags {
-        margin: 0 0 10px;
-    }
-
-    .dges-destacados-section.is-single .dges-card-meta {
-        margin-top: auto;
-        padding-top: 10px;
-        border-top: 1px solid #e5edf7;
-    }
-
-    .dges-destacados-section.is-single .dges-btn-open {
-        margin-top: 12px;
     }
 
     .dges-destacados-section.is-featured-grid .dges-document-card:first-child {
