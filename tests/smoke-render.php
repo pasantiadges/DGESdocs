@@ -175,7 +175,7 @@ smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card
 smoke_check( 'single limita a 2 tags y agrega +2', false !== strpos( $multi_single, '+2' ) && false === strpos( $multi_single, '>Tercera<' ), $multi_single );
 smoke_check( 'card no muestra insignia de tipo', false === strpos( $card, 'dges-document-type' ), $card );
 smoke_check( 'single no muestra insignia de tipo', false === strpos( $multi_single, 'dges-document-type' ), $multi_single );
-smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_detail, '>Cuarta<' ) && false !== strpos( $multi_detail, 'dges-card-tag is-main">Primera' ), $multi_detail );
+smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_detail, '>Cuarta<' ) && false !== strpos( $multi_detail, 'dges-detail-category is-main' ) && false !== strpos( $multi_detail, '>Primera<' ), $multi_detail );
 
 $featured_one   = DGES_Docs_Render::shortcode_destacados( array( $item ), 'Destacados' );
 $featured_two   = DGES_Docs_Render::shortcode_destacados( array( $item, $multi ), 'Destacados' );

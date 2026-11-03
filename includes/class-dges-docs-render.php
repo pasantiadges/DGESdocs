@@ -558,71 +558,91 @@ class DGES_Docs_Render {
         $year        = isset( $item['year'] ) ? (int) $item['year'] : 0;
         $category    = ! empty( $item['category'] ) ? (string) $item['category'] : '';
         $categories  = isset( $item['categories'] ) && is_array( $item['categories'] ) ? $item['categories'] : array();
-        $type        = ! empty( $item['document_type'] ) ? (string) $item['document_type'] : ( ! empty( $item['file_type'] ) ? (string) $item['file_type'] : __( 'Documento', 'dges-documentos' ) );
         $featured    = ! empty( $item['featured'] );
 
         if ( '' === $category ) {
             $category = DGES_Docs_Source::first_category_name( $categories );
         }
-        $current     = ! isset( $item['current'] ) || $item['current'];
-        $list_url    = DGES_Docs_Router::list_url();
-        $back_url    = DGES_Docs_Router::back_url();
+        $current  = ! isset( $item['current'] ) || $item['current'];
+        $list_url = DGES_Docs_Router::list_url();
+        $back_url = DGES_Docs_Router::back_url();
+
+        $meta = array();
+
+        if ( '' !== $number ) {
+            $meta[] = sprintf( __( 'N° %s', 'dges-documentos' ), $number );
+        }
+        if ( $year > 0 ) {
+            $meta[] = (string) $year;
+        }
+
+        $meta_text = implode( ' · ', $meta );
 
         $html  = '<article class="dges-documentos dges-documento-detalle">';
+
+        $html .= '<div class="dges-detail-topbar">';
         $html .= '<nav class="dges-detail-breadcrumb" aria-label="' . esc_attr__( 'Migas de pan', 'dges-documentos' ) . '">';
         $html .= '<a href="' . esc_url( $list_url ) . '">' . esc_html__( 'Documentos', 'dges-documentos' ) . '</a>';
         $html .= '<span aria-hidden="true">/</span><span>' . esc_html( $title ) . '</span>';
         $html .= '</nav>';
+        $html .= '<a class="dges-detail-back-link" href="' . esc_url( $back_url ) . '"><span aria-hidden="true">&larr;</span> ' . esc_html__( 'Volver a documentos', 'dges-documentos' ) . '</a>';
+        $html .= '</div>';
+
+        $html .= '<div class="dges-detail-card">';
 
         $html .= '<header class="dges-detail-header">';
-        $html .= '<div class="dges-detail-badges">';
-        $html .= '<span class="dges-document-type">' . esc_html( $type ) . '</span>';
 
-        if ( $featured ) {
-            $html .= '<span class="dges-badge-destacado">' . esc_html__( '★ Destacado', 'dges-documentos' ) . '</span>';
-        }
-        if ( ! $current ) {
-            $html .= '<span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span>';
-        }
+        if ( $featured || ! $current ) {
+            $html .= '<div class="dges-detail-badges">';
 
-        $html .= '</div>';
-        $html .= '<h1 class="dges-detail-title">' . esc_html( $title ) . '</h1>';
-
-        $meta = array();
-
-        if ( '' !== $number || $year > 0 ) {
-            $meta[] = trim( ( '' !== $number ? 'N° ' . $number : '' ) . ( '' !== $number && $year > 0 ? ' / ' : '' ) . ( $year > 0 ? (string) $year : '' ) );
-        }
-
-        if ( ! empty( $meta ) ) {
-            $html .= '<div class="dges-detail-meta">';
-
-            foreach ( $meta as $meta_item ) {
-                $html .= '<span>' . esc_html( $meta_item ) . '</span>';
+            if ( $featured ) {
+                $html .= '<span class="dges-badge-destacado">' . esc_html__( '★ Destacado', 'dges-documentos' ) . '</span>';
+            }
+            if ( ! $current ) {
+                $html .= '<span class="dges-badge-no-vigente">' . esc_html__( 'No vigente', 'dges-documentos' ) . '</span>';
             }
 
             $html .= '</div>';
         }
 
+        $html .= '<h1 class="dges-detail-title">' . esc_html( $title ) . '</h1>';
+
+        if ( '' !== $meta_text ) {
+            $html .= '<p class="dges-detail-submeta">' . esc_html( $meta_text ) . '</p>';
+        }
+
         $html .= '</header>';
+
+        $html .= '<div class="dges-detail-grid">';
+
+        $html .= '<div class="dges-detail-main">';
+        $html .= '<section class="dges-detail-description-block">';
+        $html .= '<h2>' . esc_html__( 'Descripción', 'dges-documentos' ) . '</h2>';
 
         if ( '' !== $description ) {
             $html .= '<p class="dges-detail-description">' . esc_html( $description ) . '</p>';
+        } else {
+            $html .= '<p class="dges-detail-description dges-detail-description--empty">' . esc_html__( 'Sin descripción disponible.', 'dges-documentos' ) . '</p>';
         }
 
-        $tags = self::category_tags_html( $categories, $category, 99, 'dges-card-tags dges-detail-categories' );
-
-        if ( '' !== $tags ) {
-            $html .= '<div class="dges-detail-categories-wrap">';
-            $html .= '<span class="dges-detail-categories-label">' . esc_html__( 'Categorías', 'dges-documentos' ) . '</span>';
-            $html .= $tags;
-            $html .= '</div>';
-        }
-
+        $html .= '</section>';
         $html .= self::detail_files( $item );
         $html .= self::detail_related( $item );
+        $html .= '</div>';
 
-        $html .= '<p class="dges-detail-back"><a class="dges-btn-secondary" href="' . esc_url( $back_url ) . '">' . esc_html__( 'Volver a documentos', 'dges-documentos' ) . '</a></p>';
+        $categories_html = self::detail_categories_html( $categories, $category );
+
+        $html .= '<aside class="dges-detail-aside" aria-label="' . esc_attr__( 'Ficha del documento', 'dges-documentos' ) . '">';
+        $html .= '<dl class="dges-detail-facts">';
+        $html .= self::detail_fact( __( 'Número', 'dges-documentos' ), '' !== $number ? $number : '—' );
+        $html .= self::detail_fact( __( 'Año', 'dges-documentos' ), $year > 0 ? (string) $year : '—' );
+        $html .= '<div class="dges-fact"><dt class="dges-fact-label">' . esc_html__( 'Estado', 'dges-documentos' ) . '</dt><dd class="dges-fact-value ' . ( $current ? 'is-current' : 'is-not-current' ) . '">' . esc_html( $current ? __( 'Vigente', 'dges-documentos' ) : __( 'No vigente', 'dges-documentos' ) ) . '</dd></div>';
+        $html .= '<div class="dges-fact dges-fact--categories"><dt class="dges-fact-label">' . esc_html__( 'Categorías', 'dges-documentos' ) . '</dt><dd class="dges-fact-value dges-fact-value--categories">' . ( '' !== $categories_html ? $categories_html : esc_html( '—' ) ) . '</dd></div>';
+        $html .= '</dl>';
+        $html .= '</aside>';
+
+        $html .= '</div>';
+        $html .= '</div>';
         $html .= '</article>';
 
         return $html;
@@ -635,12 +655,81 @@ class DGES_Docs_Render {
             : __( 'Documento no encontrado', 'dges-documentos' );
 
         $html  = '<article class="dges-documentos dges-documento-detalle">';
+        $html .= '<div class="dges-detail-card dges-detail-card--message">';
         $html .= '<h1 class="dges-detail-title">' . esc_html( $title ) . '</h1>';
         $html .= '<p class="dges-detail-description">' . esc_html__( 'No encontramos ese documento o ya no está disponible.', 'dges-documentos' ) . '</p>';
         $html .= '<p class="dges-detail-back"><a class="dges-btn-secondary" href="' . esc_url( $back_url ) . '">' . esc_html__( 'Volver a documentos', 'dges-documentos' ) . '</a></p>';
+        $html .= '</div>';
         $html .= '</article>';
 
         return $html;
+    }
+
+    private static function detail_fact( $label, $value ) {
+        return '<div class="dges-fact"><dt class="dges-fact-label">' . esc_html( $label ) . '</dt><dd class="dges-fact-value">' . esc_html( $value ) . '</dd></div>';
+    }
+
+    /**
+     * Categorías del detalle como lista con carpetita, destacando la principal.
+     */
+    private static function detail_categories_html( $categories, $main ) {
+        if ( ! is_array( $categories ) ) {
+            return '';
+        }
+
+        $names = array();
+        $seen  = array();
+
+        foreach ( $categories as $category ) {
+            if ( empty( $category['name'] ) ) {
+                continue;
+            }
+
+            $name = (string) $category['name'];
+            $key  = strtolower( $name );
+
+            if ( isset( $seen[ $key ] ) ) {
+                continue;
+            }
+
+            $seen[ $key ] = true;
+            $names[]      = $name;
+        }
+
+        if ( empty( $names ) ) {
+            return '';
+        }
+
+        if ( '' === (string) $main ) {
+            $main = $names[0];
+        }
+
+        $html = '<ul class="dges-detail-categories">';
+
+        foreach ( $names as $name ) {
+            $is_main = 0 === strcasecmp( $name, (string) $main );
+
+            $html .= '<li class="dges-detail-category' . ( $is_main ? ' is-main' : '' ) . '">';
+            $html .= self::folder_icon();
+            $html .= '<span class="dges-detail-category-name">' . esc_html( $name ) . '</span>';
+            $html .= '</li>';
+        }
+
+        $html .= '</ul>';
+
+        return $html;
+    }
+
+    private static function folder_icon() {
+        return '<span class="dges-detail-category-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>';
+    }
+
+    private static function file_icon() {
+        return '<span class="dges-file-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg></span>';
+    }
+
+    private static function download_icon() {
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg>';
     }
 
     private static function detail_files( $item ) {
@@ -656,7 +745,7 @@ class DGES_Docs_Render {
             return $html;
         }
 
-        $html .= '<ul>';
+        $html .= '<ul class="dges-file-list">';
 
         foreach ( $files as $file ) {
             if ( ! is_array( $file ) ) {
@@ -669,6 +758,7 @@ class DGES_Docs_Render {
                 continue;
             }
 
+            $url  = ! empty( $file['url'] ) ? (string) $file['url'] : '';
             $meta = array();
 
             if ( ! empty( $file['type'] ) ) {
@@ -677,16 +767,18 @@ class DGES_Docs_Render {
             if ( ! empty( $file['size'] ) ) {
                 $meta[] = size_format( (int) $file['size'], 1 );
             }
-            if ( empty( $file['url'] ) ) {
+            if ( '' === $url ) {
                 $meta[] = __( 'sin enlace', 'dges-documentos' );
             }
 
             $html .= '<li class="dges-detail-file">';
+            $html .= self::file_icon();
+            $html .= '<div class="dges-file-info">';
 
-            if ( ! empty( $file['url'] ) ) {
-                $html .= '<a href="' . esc_url( $file['url'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $name ) . '</a>';
+            if ( '' !== $url ) {
+                $html .= '<a class="dges-file-name" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $name ) . '</a>';
             } else {
-                $html .= '<span>' . esc_html( $name ) . '</span>';
+                $html .= '<span class="dges-file-name">' . esc_html( $name ) . '</span>';
             }
 
             if ( ! empty( $meta ) ) {
@@ -694,7 +786,16 @@ class DGES_Docs_Render {
             }
 
             if ( ! empty( $file['description'] ) ) {
-                $html .= '<span class="dges-file-description">' . esc_html( $file['description'] ) . '</span>';
+                $html .= '<span class="dges-file-description">' . esc_html( (string) $file['description'] ) . '</span>';
+            }
+
+            $html .= '</div>';
+
+            if ( '' !== $url ) {
+                $html .= '<a class="dges-file-download" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( sprintf( __( 'Descargar %s', 'dges-documentos' ), $name ) ) . '">';
+                $html .= self::download_icon();
+                $html .= '<span>' . esc_html__( 'Descargar', 'dges-documentos' ) . '</span>';
+                $html .= '</a>';
             }
 
             $html .= '</li>';
@@ -712,17 +813,64 @@ class DGES_Docs_Render {
             return '';
         }
 
-        $html  = '<section class="dges-detail-related">';
-        $html .= '<h2>' . esc_html__( 'Documentos relacionados', 'dges-documentos' ) . '</h2>';
-        $html .= '<div class="dges-documentos-results dges-related-grid">';
+        $items = '';
 
         foreach ( $related as $rel ) {
-            $html .= self::card( $rel, array( 'context' => 'related', 'link' => 'detail' ) );
+            if ( ! is_array( $rel ) ) {
+                continue;
+            }
+
+            $rel_title = isset( $rel['title'] ) ? (string) $rel['title'] : '';
+            $rel_url   = self::detail_url( isset( $rel['id'] ) ? $rel['id'] : '' );
+
+            if ( '' === $rel_title || '' === $rel_url ) {
+                continue;
+            }
+
+            $rel_number   = isset( $rel['number'] ) ? (string) $rel['number'] : '';
+            $rel_year     = isset( $rel['year'] ) ? (int) $rel['year'] : 0;
+            $rel_relation = isset( $rel['relation'] ) ? (string) $rel['relation'] : '';
+            $rel_cats     = isset( $rel['categories'] ) && is_array( $rel['categories'] ) ? $rel['categories'] : array();
+            $rel_category = ! empty( $rel['category'] ) ? (string) $rel['category'] : DGES_Docs_Source::first_category_name( $rel_cats );
+
+            $rel_meta = array();
+
+            if ( $rel_year > 0 ) {
+                $rel_meta[] = (string) $rel_year;
+            }
+            if ( '' !== $rel_number ) {
+                $rel_meta[] = sprintf( __( 'N° %s', 'dges-documentos' ), $rel_number );
+            }
+
+            $items .= '<li class="dges-related-item">';
+            $items .= '<a class="dges-related-link" href="' . esc_url( $rel_url ) . '">';
+            $items .= self::file_icon();
+            $items .= '<span class="dges-related-info">';
+            $items .= '<span class="dges-related-title">' . esc_html( $rel_title ) . '</span>';
+
+            if ( ! empty( $rel_meta ) ) {
+                $items .= '<span class="dges-related-meta">' . esc_html( implode( ' · ', $rel_meta ) ) . '</span>';
+            }
+
+            $items .= '</span>';
+
+            if ( '' !== $rel_relation ) {
+                $items .= '<span class="dges-badge-relation">' . esc_html( $rel_relation ) . '</span>';
+            }
+
+            if ( '' !== $rel_category ) {
+                $items .= '<span class="dges-card-tag is-main" title="' . esc_attr( $rel_category ) . '" aria-label="' . esc_attr( $rel_category ) . '">' . esc_html( self::category_initials( $rel_category ) ) . '</span>';
+            }
+
+            $items .= '<span class="dges-related-arrow" aria-hidden="true">&rarr;</span>';
+            $items .= '</a></li>';
         }
 
-        $html .= '</div></section>';
+        if ( '' === $items ) {
+            return '';
+        }
 
-        return $html;
+        return '<section class="dges-detail-related"><h2>' . esc_html__( 'Documentos relacionados', 'dges-documentos' ) . '</h2><ul class="dges-related-list">' . $items . '</ul></section>';
     }
 
     /**

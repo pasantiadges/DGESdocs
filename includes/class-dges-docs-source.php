@@ -339,6 +339,25 @@ class DGES_Docs_Source {
         $data = json_decode( $body, true );
 
         if ( null === $data && JSON_ERROR_NONE !== json_last_error() ) {
+            // La API del detalle a veces corta la comilla de cierre de "observacion"
+            // en documentos_relacionados y deja la coma separadora dentro del texto.
+            // Reparamos sólo ese caso y sólo si el JSON original no se pudo decodificar.
+            $repaired = preg_replace(
+                '/"([a-zA-Z0-9_]+)":"([^"]*)"([a-zA-Z0-9_]+)":/',
+                '"$1":"$2","$3":',
+                $body
+            );
+
+            if ( is_string( $repaired ) ) {
+                $decoded = json_decode( $repaired, true );
+
+                if ( is_array( $decoded ) ) {
+                    $data = $decoded;
+                }
+            }
+        }
+
+        if ( null === $data && JSON_ERROR_NONE !== json_last_error() ) {
             if ( 'detail' === $context ) {
                 // La API devuelve texto plano cuando el id no existe.
                 return new WP_Error(
