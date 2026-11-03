@@ -180,6 +180,11 @@ smoke_check( 'detail muestra todas las categorías', false !== strpos( $multi_de
 $featured_one   = DGES_Docs_Render::shortcode_destacados( array( $item ), 'Destacados' );
 $featured_two   = DGES_Docs_Render::shortcode_destacados( array( $item, $multi ), 'Destacados' );
 $featured_three = DGES_Docs_Render::shortcode_destacados( array( $item, $multi, $item ), 'Destacados' );
+$carousel_three = DGES_Docs_Render::shortcode_destacados_carrusel( array( $item, $multi, $item ), 'Destacados' );
+$carousel_one   = DGES_Docs_Render::shortcode_destacados_carrusel( array( $item ), 'Destacados' );
+smoke_check( 'carrusel arma pista con todas las tarjetas', false !== strpos( $carousel_three, 'data-carousel-track' ) && 3 === substr_count( $carousel_three, '<article' ), $carousel_three );
+smoke_check( 'carrusel trae flechas accesibles', false !== strpos( $carousel_three, 'aria-label="Destacado anterior"' ) && false !== strpos( $carousel_three, 'aria-label="Destacado siguiente"' ), $carousel_three );
+smoke_check( 'carrusel con una tarjeta usa la grilla', false === strpos( $carousel_one, 'data-dges-carousel' ) && false !== strpos( $carousel_one, 'is-single' ), $carousel_one );
 
 smoke_check( 'destacados con una card usa is-single', false !== strpos( $featured_one, 'is-single' ), $featured_one );
 smoke_check( 'destacados con dos cards usa is-pair', false !== strpos( $featured_two, 'is-pair' ), $featured_two );

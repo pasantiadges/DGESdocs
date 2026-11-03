@@ -81,6 +81,21 @@ class DGES_Docs_Plugin {
 
         wp_localize_script( 'dges-documentos', 'DGESDocumentos', self::script_config() );
 
+        // Carrusel opcional de destacados (layout="carrusel").
+        wp_register_style(
+            'dges-documentos-carrusel',
+            DGES_DOCS_URL . 'assets/css/carousel.css',
+            array( 'dges-documentos' ),
+            DGES_DOCS_VERSION
+        );
+        wp_register_script(
+            'dges-documentos-carrusel',
+            DGES_DOCS_URL . 'assets/js/carousel.js',
+            array(),
+            DGES_DOCS_VERSION,
+            true
+        );
+
         // Script común (no módulo) para la vista previa del detalle.
         wp_register_script(
             'dges-documentos-detalle',
@@ -178,7 +193,10 @@ class DGES_Docs_Plugin {
         wp_enqueue_style( 'dges-documentos' );
 
         $atts = shortcode_atts(
-            array( 'title' => __( 'Documentos Destacados', 'dges-documentos' ) ),
+            array(
+                'title'  => __( 'Documentos Destacados', 'dges-documentos' ),
+                'layout' => 'grilla',
+            ),
             $atts,
             'dges_documentos_destacados'
         );
@@ -193,6 +211,13 @@ class DGES_Docs_Plugin {
 
         if ( is_wp_error( $items ) ) {
             return '<p class="dges-error-inline">' . esc_html__( 'No se pudieron cargar los documentos destacados.', 'dges-documentos' ) . '</p>';
+        }
+
+        if ( 'carrusel' === $atts['layout'] ) {
+            wp_enqueue_style( 'dges-documentos-carrusel' );
+            wp_enqueue_script( 'dges-documentos-carrusel' );
+
+            return DGES_Docs_Render::shortcode_destacados_carrusel( $items, $atts['title'] );
         }
 
         return DGES_Docs_Render::shortcode_destacados( $items, $atts['title'] );

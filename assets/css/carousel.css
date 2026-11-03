@@ -1,0 +1,135 @@
+/* Carrusel de documentos destacados: [dges_documentos_destacados layout="carrusel"] */
+.dges-carousel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+}
+
+.dges-destacados-section.is-carousel .dges-carousel-head h2 {
+    margin: 0;
+}
+
+.dges-carousel-nav {
+    display: none;
+    gap: 8px;
+}
+
+.dges-destacados-section.is-carousel.is-ready .dges-carousel-nav {
+    display: flex;
+}
+
+.dges-destacados-section.is-carousel.is-static .dges-carousel-nav,
+.dges-destacados-section.is-carousel.is-static .dges-carousel-dots {
+    display: none;
+}
+
+/* Selector doble para que no lo pisen los estilos de botones del tema */
+.dges-carousel-nav .dges-carousel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    min-width: 0;
+    height: 38px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--dges-blue);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: none;
+    color: var(--dges-blue);
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .2s ease, color .2s ease, opacity .2s ease;
+}
+
+.dges-carousel-nav .dges-carousel-btn svg {
+    display: block;
+}
+
+.dges-carousel-nav .dges-carousel-btn:hover:not(:disabled),
+.dges-carousel-nav .dges-carousel-btn:focus-visible {
+    background: var(--dges-blue);
+    color: #fff;
+}
+
+.dges-carousel-nav .dges-carousel-btn:disabled {
+    opacity: .35;
+    cursor: default;
+}
+
+.dges-carousel-track {
+    display: flex;
+    gap: 18px;
+    /* Espacio para que la sombra y la animación de las tarjetas no se corten */
+    padding: 6px 4px 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+}
+
+.dges-carousel-track:focus-visible {
+    outline: 2px solid var(--dges-blue);
+    outline-offset: 2px;
+}
+
+.dges-destacados-section.is-carousel .dges-carousel-track > .dges-document-card {
+    flex: 0 0 calc((100% - 36px) / 3);
+    min-width: 0;
+    scroll-snap-align: start;
+}
+
+.dges-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.dges-carousel-dots .dges-carousel-dot {
+    width: 10px;
+    min-width: 0;
+    height: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--dges-border);
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color .2s ease, width .2s ease;
+}
+
+.dges-carousel-dots .dges-carousel-dot.is-active {
+    width: 24px;
+    border-radius: 5px;
+    background: var(--dges-blue);
+}
+
+@media (max-width: 900px) {
+    .dges-destacados-section.is-carousel .dges-carousel-track > .dges-document-card {
+        flex-basis: calc((100% - 18px) / 2);
+    }
+}
+
+@media (max-width: 560px) {
+    /* En celulares se ve una tarjeta y asoma la siguiente */
+    .dges-destacados-section.is-carousel .dges-carousel-track > .dges-document-card {
+        flex-basis: 85%;
+    }
+
+    .dges-carousel-nav .dges-carousel-btn {
+        width: 34px;
+        height: 34px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dges-carousel-track {
+        scroll-behavior: auto;
+    }
+}

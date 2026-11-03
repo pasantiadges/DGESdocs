@@ -176,6 +176,38 @@ class DGES_Docs_Render {
     }
 
     /**
+     * Destacados en carrusel: [dges_documentos_destacados layout="carrusel"].
+     * Sin JavaScript las tarjetas se deslizan igual; el script suma flechas y puntos.
+     */
+    public static function shortcode_destacados_carrusel( $items, $title ) {
+        if ( ! is_array( $items ) || count( $items ) < 2 ) {
+            // Con una sola tarjeta o ninguna, el carrusel no aporta: se usa la grilla.
+            return self::shortcode_destacados( $items, $title );
+        }
+
+        $arrow = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="%s"></polyline></svg>';
+
+        $output  = '<section class="dges-documentos dges-destacados-section is-carousel" data-dges-carousel aria-roledescription="carrusel" aria-label="' . esc_attr( $title ) . '">';
+        $output .= '<div class="dges-carousel-head">';
+        $output .= '<h2>' . esc_html( $title ) . '</h2>';
+        $output .= '<div class="dges-carousel-nav">';
+        $output .= '<button type="button" class="dges-carousel-btn" data-carousel-prev aria-label="' . esc_attr__( 'Destacado anterior', 'dges-documentos' ) . '">' . sprintf( $arrow, '15 18 9 12 15 6' ) . '</button>';
+        $output .= '<button type="button" class="dges-carousel-btn" data-carousel-next aria-label="' . esc_attr__( 'Destacado siguiente', 'dges-documentos' ) . '">' . sprintf( $arrow, '9 18 15 12 9 6' ) . '</button>';
+        $output .= '</div></div>';
+        $output .= '<div class="dges-carousel-track" data-carousel-track tabindex="0">';
+
+        foreach ( $items as $item ) {
+            $output .= self::card( $item, array( 'context' => 'destacado' ) );
+        }
+
+        $output .= '</div>';
+        $output .= '<div class="dges-carousel-dots" data-carousel-dots></div>';
+        $output .= '</section>';
+
+        return $output;
+    }
+
+    /**
      * Card reutilizable por listado, destacados y (más adelante) detalle.
      *
      * @param array $item
