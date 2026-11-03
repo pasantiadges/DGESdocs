@@ -656,7 +656,8 @@ class DGES_Docs_Render {
             return $html;
         }
 
-        $html .= '<ul>';
+        $html       .= '<ul>';
+        $has_preview = false;
 
         foreach ( $files as $file ) {
             if ( ! is_array( $file ) ) {
@@ -697,12 +698,45 @@ class DGES_Docs_Render {
                 $html .= '<span class="dges-file-description">' . esc_html( $file['description'] ) . '</span>';
             }
 
+            if ( ! empty( $file['url'] ) ) {
+                $html .= '<span class="dges-file-actions">';
+
+                // Vista previa: solo PDF. Sin JavaScript abre una pestaña nueva.
+                if ( self::is_pdf_file( $file ) ) {
+                    $html       .= '<a class="dges-file-preview" href="' . esc_url( $file['url'] ) . '" target="_blank" rel="noopener noreferrer"'
+                        . ' data-dges-preview="' . esc_url( $file['url'] ) . '" data-dges-preview-title="' . esc_attr( $name ) . '" aria-expanded="false">'
+                        . esc_html__( 'Vista previa', 'dges-documentos' ) . '</a>';
+                    $has_preview = true;
+                }
+
+                $html .= '<a class="dges-file-download" href="' . esc_url( $file['url'] ) . '" download target="_blank" rel="noopener noreferrer"'
+                    . ' aria-label="' . esc_attr( sprintf( __( 'Descargar %s', 'dges-documentos' ), $name ) ) . '">'
+                    . esc_html__( 'Descargar', 'dges-documentos' ) . '</a>';
+                $html .= '</span>';
+            }
+
             $html .= '</li>';
         }
 
-        $html .= '</ul></section>';
+        $html .= '</ul>';
+
+        if ( $has_preview ) {
+            $html .= '<div class="dges-detail-viewer" data-dges-viewer hidden></div>';
+        }
+
+        $html .= '</section>';
 
         return $html;
+    }
+
+    private static function is_pdf_file( $file ) {
+        if ( ! empty( $file['type'] ) && 'PDF' === strtoupper( (string) $file['type'] ) ) {
+            return true;
+        }
+
+        $filename = ! empty( $file['filename'] ) ? (string) $file['filename'] : '';
+
+        return '' !== $filename && 'pdf' === strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
     }
 
     private static function detail_related( $item ) {

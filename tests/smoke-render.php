@@ -256,6 +256,26 @@ smoke_check( 'detail contiene relacionados', false !== strpos( $detail_html, 'Do
 smoke_check( 'detail linkea relacionado', false !== strpos( $detail_html, 'https://example.test/documentos/documento/117/' ), $detail_html );
 smoke_check( 'detail muestra relación', false !== strpos( $detail_html, 'dges-badge-relation' ) && false !== strpos( $detail_html, 'Complementa' ), $detail_html );
 smoke_check( 'detail contiene volver', false !== strpos( $detail_html, 'Volver a documentos' ), $detail_html );
+smoke_check( 'detail ofrece vista previa del PDF', false !== strpos( $detail_html, 'data-dges-preview="https://example.com/rm-116.pdf"' ), $detail_html );
+smoke_check( 'detail vista previa sin JS abre pestaña nueva', false !== strpos( $detail_html, 'class="dges-file-preview" href="https://example.com/rm-116.pdf" target="_blank"' ), $detail_html );
+smoke_check( 'detail incluye visor oculto', false !== strpos( $detail_html, 'data-dges-viewer hidden' ), $detail_html );
+smoke_check( 'detail sin vista previa para archivo sin enlace', 1 === substr_count( $detail_html, 'data-dges-preview=' ), $detail_html );
+smoke_check( 'detail ofrece descargar junto a la vista previa', false !== strpos( $detail_html, 'class="dges-file-download" href="https://example.com/rm-116.pdf" download' ), $detail_html );
+smoke_check( 'detail sin descargar para archivo sin enlace', 1 === substr_count( $detail_html, 'dges-file-download' ), $detail_html );
+
+$no_pdf_item          = $detail_item;
+$no_pdf_item['files'] = array(
+    array( 'id' => '50', 'name' => 'Planilla', 'type' => 'XLSX', 'url' => 'https://example.com/planilla.xlsx' ),
+);
+$no_pdf_html = DGES_Docs_Render::detail( $no_pdf_item );
+smoke_check( 'detail sin PDF no ofrece vista previa', false === strpos( $no_pdf_html, 'data-dges-preview' ) && false === strpos( $no_pdf_html, 'data-dges-viewer' ), $no_pdf_html );
+smoke_check( 'detail sin PDF igual ofrece descargar', false !== strpos( $no_pdf_html, 'class="dges-file-download" href="https://example.com/planilla.xlsx"' ), $no_pdf_html );
+
+$pdf_by_name_item          = $detail_item;
+$pdf_by_name_item['files'] = array(
+    array( 'id' => '51', 'name' => 'Anexo', 'type' => '', 'filename' => 'anexo.PDF', 'url' => 'https://example.com/anexo.PDF' ),
+);
+smoke_check( 'detail reconoce PDF por extensión', false !== strpos( DGES_Docs_Render::detail( $pdf_by_name_item ), 'data-dges-preview=' ) );
 
 $not_found = DGES_Docs_Render::detail_not_found( '999' );
 smoke_check( 'detail 404 contiene mensaje', false !== strpos( $not_found, 'Documento no encontrado' ), $not_found );

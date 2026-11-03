@@ -1041,3 +1041,130 @@
         animation: none !important;
     }
 }
+
+/* Vista previa y descarga de archivos en el detalle */
+.dges-file-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.dges-detail-file .dges-file-preview,
+.dges-detail-file .dges-file-download {
+    display: inline-block;
+    padding: 3px 12px;
+    border: 1px solid var(--dges-blue);
+    border-radius: 999px;
+    background: var(--dges-blue);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.dges-detail-file .dges-file-preview:hover,
+.dges-detail-file .dges-file-preview:focus-visible {
+    background: var(--dges-blue-dark);
+    color: #fff;
+    text-decoration: none;
+}
+
+.dges-detail-file .dges-file-preview.is-active {
+    background: #fff;
+    color: var(--dges-blue);
+}
+
+.dges-detail-file .dges-file-download {
+    background: #fff;
+    color: var(--dges-blue);
+}
+
+.dges-detail-file .dges-file-download:hover,
+.dges-detail-file .dges-file-download:focus-visible {
+    background: var(--dges-blue);
+    color: #fff;
+    text-decoration: none;
+}
+
+.dges-detail-viewer {
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid var(--dges-border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.dges-detail-viewer[hidden] {
+    display: none;
+}
+
+.dges-viewer-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--dges-border);
+    background: var(--dges-blue-light);
+}
+
+.dges-documento-detalle .dges-viewer-title {
+    margin: 0;
+    color: var(--dges-blue);
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.dges-viewer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Selector doble para que no lo pisen los estilos de botones del tema */
+.dges-detail-viewer .dges-btn-secondary {
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 6px 12px;
+    box-shadow: none;
+    font: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.dges-viewer-frame {
+    display: block;
+    width: 100%;
+    height: min(80vh, 900px);
+    border: 0;
+    background: #f3f4f6;
+}
+
+.dges-viewer-hint {
+    margin: 0;
+    padding: 8px 16px;
+    border-top: 1px solid var(--dges-border);
+    color: #4b5563;
+    font-size: .8rem;
+    text-align: center;
+}
+
+@media (max-width: 560px) {
+    .dges-file-actions {
+        display: flex;
+        margin: 6px 0 0;
+    }
+
+    .dges-viewer-frame {
+        height: 70vh;
+    }
+}

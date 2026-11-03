@@ -80,6 +80,15 @@ class DGES_Docs_Plugin {
         );
 
         wp_localize_script( 'dges-documentos', 'DGESDocumentos', self::script_config() );
+
+        // Script común (no módulo) para la vista previa del detalle.
+        wp_register_script(
+            'dges-documentos-detalle',
+            DGES_DOCS_URL . 'assets/js/detail-preview.js',
+            array(),
+            DGES_DOCS_VERSION,
+            true
+        );
     }
 
     public static function module_script_tag( $tag, $handle ) {
@@ -236,6 +245,7 @@ class DGES_Docs_Plugin {
 
     public static function shortcode_detalle() {
         wp_enqueue_style( 'dges-documentos' );
+        wp_enqueue_script( 'dges-documentos-detalle' );
 
         $item  = DGES_Docs_Router::get_current_item();
         $error = DGES_Docs_Router::get_current_error();
