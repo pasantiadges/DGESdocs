@@ -332,6 +332,11 @@
     margin-bottom: 10px;
 }
 
+/* En el listado las insignias van alineadas a la derecha. */
+.dges-list-section .dges-card-header {
+    justify-content: flex-end;
+}
+
 .dges-document-type {
     display: inline-flex;
     align-items: center;
@@ -406,8 +411,7 @@
     text-decoration: underline;
 }
 
-/* Descripción: hasta tres líneas, con puntos suspensivos. Los tags siguen al
-   texto real y el espacio flexible queda abajo, antes de año/número y botón. */
+/* Descripción: hasta tres líneas, con puntos suspensivos. */
 .dges-document-card p {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -419,19 +423,40 @@
     line-height: 1.55;
 }
 
-/* Año y número: fila con altura fija, apoyada abajo, sin línea divisoria. */
-.dges-card-meta {
+/* Categoría principal como pill de una línea, con la fecha al lado. */
+.dges-card-subhead {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 6px 14px;
-    min-height: 26px;
-    margin-top: auto;
-    padding-top: 10px;
-    border-top: 0;
-    color: #5b6b80;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5edf7;
+}
+
+.dges-card-category {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #e8f2ff;
+    color: #006dcc;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dges-card-date {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: #6b7280;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.35;
+    white-space: nowrap;
 }
 
 .dges-card-tags {
@@ -501,6 +526,22 @@
 .dges-list-section .dges-document-card {
     width: 100%;
     min-height: 340px;
+}
+
+/* En el listado, lo destacado se marca con borde amarillo. */
+.dges-list-section .dges-document-card.is-featured {
+    border: 2px solid #d4a017;
+    box-shadow: 0 10px 25px rgba(212, 160, 23, .18);
+}
+
+.dges-list-section .dges-document-card.is-featured:hover {
+    border-color: #b8860b;
+    box-shadow: 0 14px 30px rgba(212, 160, 23, .22);
+}
+
+/* El botón queda apoyado abajo. */
+.dges-list-section .dges-document-card .dges-btn-open {
+    margin-top: auto;
 }
 
 @container dges-list (min-width: 500px) {
@@ -643,7 +684,6 @@
     gap: 8px;
     margin: 0 0 18px;
     color: inherit;
-    font-size: 1.6rem;
     font-weight: 700;
     letter-spacing: 0;
     text-align: left;
@@ -651,7 +691,7 @@
 }
 
 .dges-destacados-section h2::before {
-    content: "★";
+    content: "\2605";
     color: #d4a017;
     font-size: 1.1em;
     line-height: 1;
@@ -689,11 +729,6 @@
     line-height: 1.55;
 }
 
-.dges-destacados-section .dges-card-meta {
-    font-size: 12px;
-    line-height: 1.4;
-}
-
 .dges-destacados-section.is-single .dges-document-card {
     padding: 26px 28px;
 }
@@ -718,15 +753,6 @@
     color: #4b5563;
     font-size: 1rem;
     line-height: 1.6;
-}
-
-.dges-destacados-section.is-single .dges-card-tags {
-    margin-bottom: 0;
-}
-
-.dges-destacados-section.is-single .dges-card-meta {
-    margin-top: 12px;
-    font-size: 12.5px;
 }
 
 .dges-destacados-section.is-single .dges-btn-open {
@@ -931,6 +957,13 @@
     color: #006dcc;
 }
 
+.dges-file-icon-ext {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    line-height: 1;
+}
+
 .dges-file-info {
     display: flex;
     flex-direction: column;
@@ -968,29 +1001,132 @@ a.dges-file-name:focus-visible {
     line-height: 1.4;
 }
 
+.dges-file-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: 8px;
+}
+
+.dges-file-preview,
 .dges-file-download {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
     gap: 6px;
     height: 34px;
     padding: 0 12px;
     border-radius: 6px;
-    background: var(--dges-blue);
-    color: #fff;
     font-size: .82rem;
     font-weight: 600;
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color .2s ease;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.dges-file-preview {
+    border: 1px solid #c7d5e8;
+    background: #fff;
+    color: var(--dges-blue);
+}
+
+.dges-file-preview:hover,
+.dges-file-preview:focus-visible {
+    border-color: var(--dges-blue);
+    background: #f0f6ff;
+    color: var(--dges-blue);
+}
+
+.dges-file-download {
+    background: var(--dges-blue);
+    color: #fff;
 }
 
 .dges-file-download:hover,
 .dges-file-download:focus-visible {
     background: var(--dges-blue-dark);
     color: #fff;
+}
+
+.dges-file-preview.is-disabled,
+.dges-file-download.is-disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.dges-file-preview.is-active {
+    border-color: var(--dges-blue);
+    background: #e8f2ff;
+    color: var(--dges-blue);
+}
+
+/* Visor de PDF integrado para la vista previa. */
+.dges-detail-viewer {
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid var(--dges-border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.dges-detail-viewer[hidden] {
+    display: none;
+}
+
+.dges-viewer-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--dges-border);
+    background: var(--dges-blue-light);
+}
+
+.dges-documento-detalle .dges-viewer-title {
+    margin: 0;
+    color: var(--dges-blue);
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.dges-viewer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dges-detail-viewer .dges-btn-secondary {
+    min-width: 0;
+    height: auto;
+    margin: 0;
+    padding: 6px 12px;
+    box-shadow: none;
+    font: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.dges-viewer-frame {
+    display: block;
+    width: 100%;
+    height: min(80vh, 900px);
+    border: 0;
+    background: #f3f4f6;
+}
+
+.dges-viewer-hint {
+    margin: 0;
+    padding: 8px 16px;
+    border-top: 1px solid var(--dges-border);
+    color: #4b5563;
+    font-size: .8rem;
+    text-align: center;
 }
 
 .dges-related-item {
@@ -1011,7 +1147,16 @@ a.dges-file-name:focus-visible {
     gap: 12px;
     padding: 12px 14px;
     color: inherit;
+    cursor: pointer;
     text-decoration: none;
+}
+
+/* Los adornos no deben quedarse con el click: el enlace es toda la fila. */
+.dges-related-link .dges-file-icon,
+.dges-related-link .dges-related-arrow,
+.dges-related-link .dges-badge-relation,
+.dges-related-link .dges-card-tag {
+    pointer-events: none;
 }
 
 .dges-related-info {
@@ -1109,15 +1254,28 @@ a.dges-file-name:focus-visible {
     color: #8b1e3f;
 }
 
-/* Categorías: etiqueta arriba y lista con carpetita debajo. */
-.dges-fact--categories {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+/* Categorías: tarjeta aparte, debajo de los datos. */
+.dges-detail-categories-card {
+    margin-top: 14px;
+    padding: 12px 14px 14px;
+    border: 1px solid var(--dges-border);
+    border-radius: 10px;
+    background: #fbfdff;
 }
 
-.dges-fact-value--categories {
-    text-align: left;
+.dges-documento-detalle .dges-detail-categories-card h2 {
+    margin: 0 0 8px;
+    padding: 0;
+    color: #5b6b80;
+    font-size: .82rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.dges-detail-categories-empty {
+    margin: 0;
+    color: #6b7280;
+    font-size: .82rem;
 }
 
 .dges-detail-categories {
@@ -1133,15 +1291,15 @@ a.dges-file-name:focus-visible {
     display: flex;
     align-items: flex-start;
     gap: 7px;
-    color: #4b5563;
+    color: #6b7280;
     font-size: .82rem;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.4;
 }
 
-.dges-detail-category.is-main {
-    color: #006dcc;
-    font-weight: 700;
+.dges-documento-detalle .dges-detail-category.is-main {
+    color: #1f2a44;
+    font-weight: 600;
 }
 
 .dges-detail-category-icon {
@@ -1220,7 +1378,6 @@ a.dges-file-name:focus-visible {
 
     .dges-destacados-section h2 {
         margin-bottom: 16px;
-        font-size: 1.3rem;
     }
 
     .dges-destacados-section .dges-documentos-results {
@@ -1259,11 +1416,33 @@ a.dges-file-name:focus-visible {
     }
 
     .dges-detail-file {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
+    .dges-file-actions {
+        gap: 6px;
+    }
+
+    /* En celular los botones de archivo quedan sólo con icono. */
+    .dges-file-preview,
     .dges-file-download {
-        width: 100%;
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+    }
+
+    .dges-file-preview span,
+    .dges-file-download span {
+        display: none;
+    }
+
+    .dges-file-name,
+    .dges-file-meta,
+    .dges-file-description {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .dges-related-link {

@@ -135,6 +135,7 @@ $raw = array(
     'observacion' => 'Referido a la aprobación de propuestas de postítulos.',
     'numero'      => '116',
     'anio'        => '2026',
+    'fecha'       => '2026-07-15',
     'vigente'     => 'No',
     'destacado'   => 'Si',
     'categorias'  => array(
@@ -163,15 +164,15 @@ $multi_detail = DGES_Docs_Render::detail( $multi );
 smoke_check( 'card contiene clases base', false !== strpos( $card, 'dges-document-card' ), $card );
 smoke_check( 'card contiene título escapado', false !== strpos( $card, 'Resolución Ministerial 116-2026' ), $card );
 smoke_check( 'card muestra No vigente', false !== strpos( $card, 'No vigente' ), $card );
-smoke_check( 'card muestra Destacado', false !== strpos( $card, 'Destacado' ), $card );
-smoke_check( 'card muestra número', false !== strpos( $card, 'N° 116' ), $card );
+smoke_check( 'card destacada usa borde (is-featured)', false !== strpos( $card, 'is-featured' ), $card );
+smoke_check( 'card muestra la fecha', false !== strpos( $card, '15-07-2026' ), $card );
 smoke_check( 'card linkea al detalle', false !== strpos( $card, 'href="https://example.test/documentos/documento/116/"' ), $card );
 smoke_check( 'card muestra Ver documento', false !== strpos( $card, 'Ver documento' ), $card );
-smoke_check( 'card usa tags de categoría', false !== strpos( $card, 'dges-card-tags' ), $card );
+smoke_check( 'card muestra la categoría principal', false !== strpos( $card, 'dges-card-category' ) && false !== strpos( $card, 'Normativas DGES' ), $card );
 smoke_check( 'card de listado tiene contexto', false !== strpos( $card, 'dges-card--list' ), $card );
-smoke_check( 'card limita a 3 tags y agrega +1', false !== strpos( $multi_card, '+1' ) && false === strpos( $multi_card, '>Cuarta<' ), $multi_card );
-smoke_check( 'card usa iniciales y tooltip', false !== strpos( $multi_card, 'title="Primera"' ) && false !== strpos( $multi_card, '>PRI<' ), $multi_card );
-smoke_check( 'card marca la categoría principal', false !== strpos( $multi_card, 'dges-card-tag is-main" title="Primera" aria-label="Primera">PRI' ), $multi_card );
+smoke_check( 'card no muestra tags', false === strpos( $card, 'dges-card-tags' ), $card );
+smoke_check( 'card destacada muestra la insignia Destacado', false !== strpos( $card, 'dges-badge-destacado' ), $card );
+smoke_check( 'card multi usa la principal y no +N', false !== strpos( $multi_card, '>Primera<' ) && false === strpos( $multi_card, 'dges-card-tag--more' ), $multi_card );
 smoke_check( 'single limita a 2 tags y agrega +2', false !== strpos( $multi_single, '+2' ) && false === strpos( $multi_single, '>Tercera<' ), $multi_single );
 smoke_check( 'card no muestra insignia de tipo', false === strpos( $card, 'dges-document-type' ), $card );
 smoke_check( 'single no muestra insignia de tipo', false === strpos( $multi_single, 'dges-document-type' ), $multi_single );
@@ -256,6 +257,26 @@ smoke_check( 'detail contiene relacionados', false !== strpos( $detail_html, 'Do
 smoke_check( 'detail linkea relacionado', false !== strpos( $detail_html, 'https://example.test/documentos/documento/117/' ), $detail_html );
 smoke_check( 'detail muestra relación', false !== strpos( $detail_html, 'dges-badge-relation' ) && false !== strpos( $detail_html, 'Complementa' ), $detail_html );
 smoke_check( 'detail contiene volver', false !== strpos( $detail_html, 'Volver a documentos' ), $detail_html );
+smoke_check( 'detail ofrece vista previa del PDF', false !== strpos( $detail_html, 'data-dges-preview="https://example.com/rm-116.pdf"' ), $detail_html );
+smoke_check( 'detail vista previa sin JS abre pestaña nueva', false !== strpos( $detail_html, 'class="dges-file-preview" href="https://example.com/rm-116.pdf" target="_blank"' ), $detail_html );
+smoke_check( 'detail incluye visor oculto', false !== strpos( $detail_html, 'data-dges-viewer hidden' ), $detail_html );
+smoke_check( 'detail sin vista previa para archivo sin enlace', 1 === substr_count( $detail_html, 'data-dges-preview=' ), $detail_html );
+smoke_check( 'detail ofrece descargar junto a la vista previa', false !== strpos( $detail_html, 'class="dges-file-download" href="https://example.com/rm-116.pdf"' ), $detail_html );
+smoke_check( 'detail archivo sin enlace muestra descarga deshabilitada', false !== strpos( $detail_html, 'dges-file-download is-disabled' ), $detail_html );
+
+$no_pdf_item          = $detail_item;
+$no_pdf_item['files'] = array(
+    array( 'id' => '50', 'name' => 'Planilla', 'type' => 'XLSX', 'url' => 'https://example.com/planilla.xlsx' ),
+);
+$no_pdf_html = DGES_Docs_Render::detail( $no_pdf_item );
+smoke_check( 'detail sin PDF no ofrece vista previa', false === strpos( $no_pdf_html, 'data-dges-preview' ) && false === strpos( $no_pdf_html, 'data-dges-viewer' ), $no_pdf_html );
+smoke_check( 'detail sin PDF igual ofrece descargar', false !== strpos( $no_pdf_html, 'class="dges-file-download" href="https://example.com/planilla.xlsx"' ), $no_pdf_html );
+
+$pdf_by_name_item          = $detail_item;
+$pdf_by_name_item['files'] = array(
+    array( 'id' => '51', 'name' => 'Anexo', 'type' => '', 'filename' => 'anexo.PDF', 'url' => 'https://example.com/anexo.PDF' ),
+);
+smoke_check( 'detail reconoce PDF por extensión', false !== strpos( DGES_Docs_Render::detail( $pdf_by_name_item ), 'data-dges-preview=' ) );
 
 $not_found = DGES_Docs_Render::detail_not_found( '999' );
 smoke_check( 'detail 404 contiene mensaje', false !== strpos( $not_found, 'Documento no encontrado' ), $not_found );

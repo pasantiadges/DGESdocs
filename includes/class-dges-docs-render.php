@@ -202,10 +202,9 @@ class DGES_Docs_Render {
         $title       = isset( $item['title'] ) ? (string) $item['title'] : '';
         $description = isset( $item['description'] ) ? (string) $item['description'] : '';
         $type        = ! empty( $item['document_type'] ) ? (string) $item['document_type'] : ( ! empty( $item['file_type'] ) ? (string) $item['file_type'] : __( 'Documento', 'dges-documentos' ) );
-        $number      = isset( $item['number'] ) ? (string) $item['number'] : '';
-        $year        = isset( $item['year'] ) ? (int) $item['year'] : 0;
         $category    = ! empty( $item['category'] ) ? (string) $item['category'] : '';
         $categories  = isset( $item['categories'] ) && is_array( $item['categories'] ) ? $item['categories'] : array();
+        $date        = self::format_date( isset( $item['date'] ) ? $item['date'] : '' );
         $featured    = ! empty( $item['featured'] );
         $current     = ! isset( $item['current'] ) || $item['current'];
         $relation    = isset( $item['relation'] ) ? (string) $item['relation'] : '';
@@ -241,6 +240,9 @@ class DGES_Docs_Render {
                 }
             }
         }
+        if ( $featured ) {
+            $classes .= ' is-featured';
+        }
         if ( ! $current ) {
             $classes .= ' is-not-current';
         }
@@ -269,25 +271,23 @@ class DGES_Docs_Render {
             $html .= '<h3>' . esc_html( $title ) . '</h3>';
         }
 
+        if ( '' !== $category || '' !== $date ) {
+            $html .= '<div class="dges-card-subhead">';
+
+            if ( '' !== $category ) {
+                $html .= '<span class="dges-card-category" title="' . esc_attr( $category ) . '" aria-label="' . esc_attr( $category ) . '">' . esc_html( $category ) . '</span>';
+            }
+
+            if ( '' !== $date ) {
+                $html .= '<span class="dges-card-date">' . esc_html( $date ) . '</span>';
+            }
+
+            $html .= '</div>';
+        }
+
         if ( $args['show_description'] && '' !== $description ) {
             // El recorte a 3 líneas con puntos suspensivos lo hace el CSS (line-clamp).
             $html .= '<p>' . esc_html( $description ) . '</p>';
-        }
-
-        $html .= self::category_tags_html( $categories, $category, 3, 'dges-card-tags', true );
-
-        if ( $args['show_meta'] ) {
-            $meta = array();
-
-            if ( $year > 0 ) {
-                $meta[] = '<span>' . sprintf( esc_html__( 'Año %s', 'dges-documentos' ), esc_html( (string) $year ) ) . '</span>';
-            }
-            if ( '' !== $number ) {
-                $meta[] = '<span>' . sprintf( esc_html__( 'N° %s', 'dges-documentos' ), esc_html( $number ) ) . '</span>';
-            }
-
-            // Se imprime siempre para reservar la altura fija y alinear el botón en todas las cards.
-            $html .= '<div class="dges-card-meta">' . implode( '', $meta ) . '</div>';
         }
 
         if ( '' !== $href && '' !== $link_label ) {
@@ -297,6 +297,17 @@ class DGES_Docs_Render {
         $html .= '</article>';
 
         return $html;
+    }
+
+    /**
+     * Fecha Y-m-d a d-m-Y para mostrar en cards.
+     */
+    private static function format_date( $date ) {
+        if ( preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', (string) $date, $m ) ) {
+            return $m[3] . '-' . $m[2] . '-' . $m[1];
+        }
+
+        return '';
     }
 
     /**
@@ -636,9 +647,11 @@ class DGES_Docs_Render {
         $html .= '<dl class="dges-detail-facts">';
         $html .= self::detail_fact( __( 'Número', 'dges-documentos' ), '' !== $number ? $number : '—' );
         $html .= self::detail_fact( __( 'Año', 'dges-documentos' ), $year > 0 ? (string) $year : '—' );
-        $html .= '<div class="dges-fact"><dt class="dges-fact-label">' . esc_html__( 'Estado', 'dges-documentos' ) . '</dt><dd class="dges-fact-value ' . ( $current ? 'is-current' : 'is-not-current' ) . '">' . esc_html( $current ? __( 'Vigente', 'dges-documentos' ) : __( 'No vigente', 'dges-documentos' ) ) . '</dd></div>';
-        $html .= '<div class="dges-fact dges-fact--categories"><dt class="dges-fact-label">' . esc_html__( 'Categorías', 'dges-documentos' ) . '</dt><dd class="dges-fact-value dges-fact-value--categories">' . ( '' !== $categories_html ? $categories_html : esc_html( '—' ) ) . '</dd></div>';
         $html .= '</dl>';
+        $html .= '<section class="dges-detail-categories-card">';
+        $html .= '<h2>' . esc_html__( 'Categorías', 'dges-documentos' ) . '</h2>';
+        $html .= '' !== $categories_html ? $categories_html : '<p class="dges-detail-categories-empty">' . esc_html( '—' ) . '</p>';
+        $html .= '</section>';
         $html .= '</aside>';
 
         $html .= '</div>';
@@ -724,8 +737,22 @@ class DGES_Docs_Render {
         return '<span class="dges-detail-category-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg></span>';
     }
 
-    private static function file_icon() {
+    private static function file_icon( $type = '' ) {
+        $type = strtoupper( trim( (string) $type ) );
+
+        if ( '' === $type ) {
+            return self::document_icon();
+        }
+
+        return '<span class="dges-file-icon" aria-hidden="true"><span class="dges-file-icon-ext">' . esc_html( $type ) . '</span></span>';
+    }
+
+    private static function document_icon() {
         return '<span class="dges-file-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg></span>';
+    }
+
+    private static function preview_icon() {
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
     }
 
     private static function download_icon() {
@@ -745,7 +772,8 @@ class DGES_Docs_Render {
             return $html;
         }
 
-        $html .= '<ul class="dges-file-list">';
+        $html        .= '<ul class="dges-file-list">';
+        $has_preview  = false;
 
         foreach ( $files as $file ) {
             if ( ! is_array( $file ) ) {
@@ -758,8 +786,9 @@ class DGES_Docs_Render {
                 continue;
             }
 
-            $url  = ! empty( $file['url'] ) ? (string) $file['url'] : '';
-            $meta = array();
+            $url    = ! empty( $file['url'] ) ? (string) $file['url'] : '';
+            $is_pdf = self::is_pdf_file( $file );
+            $meta   = array();
 
             if ( ! empty( $file['type'] ) ) {
                 $meta[] = (string) $file['type'];
@@ -772,7 +801,7 @@ class DGES_Docs_Render {
             }
 
             $html .= '<li class="dges-detail-file">';
-            $html .= self::file_icon();
+            $html .= self::file_icon( isset( $file['type'] ) ? (string) $file['type'] : '' );
             $html .= '<div class="dges-file-info">';
 
             if ( '' !== $url ) {
@@ -791,19 +820,63 @@ class DGES_Docs_Render {
 
             $html .= '</div>';
 
+            $html .= '<div class="dges-file-actions">';
+
             if ( '' !== $url ) {
-                $html .= '<a class="dges-file-download" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" aria-label="' . esc_attr( sprintf( __( 'Descargar %s', 'dges-documentos' ), $name ) ) . '">';
+                if ( $is_pdf ) {
+                    $html .= '<a class="dges-file-preview" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer"'
+                        . ' data-dges-preview="' . esc_url( $url ) . '" data-dges-preview-title="' . esc_attr( $name ) . '" aria-expanded="false"'
+                        . ' aria-label="' . esc_attr( sprintf( __( 'Vista previa de %s', 'dges-documentos' ), $name ) ) . '">';
+                    $html .= self::preview_icon();
+                    $html .= '<span>' . esc_html__( 'Vista previa', 'dges-documentos' ) . '</span>';
+                    $html .= '</a>';
+                    $has_preview = true;
+                }
+
+                $html .= '<a class="dges-file-download" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" download aria-label="' . esc_attr( sprintf( __( 'Descargar %s', 'dges-documentos' ), $name ) ) . '">';
                 $html .= self::download_icon();
                 $html .= '<span>' . esc_html__( 'Descargar', 'dges-documentos' ) . '</span>';
                 $html .= '</a>';
+            } else {
+                $disabled_title = esc_attr__( 'Sin enlace disponible', 'dges-documentos' );
+
+                if ( $is_pdf ) {
+                    $html .= '<span class="dges-file-preview is-disabled" aria-disabled="true" title="' . $disabled_title . '">';
+                    $html .= self::preview_icon();
+                    $html .= '<span>' . esc_html__( 'Vista previa', 'dges-documentos' ) . '</span>';
+                    $html .= '</span>';
+                }
+
+                $html .= '<span class="dges-file-download is-disabled" aria-disabled="true" title="' . $disabled_title . '">';
+                $html .= self::download_icon();
+                $html .= '<span>' . esc_html__( 'Descargar', 'dges-documentos' ) . '</span>';
+                $html .= '</span>';
             }
+
+            $html .= '</div>';
 
             $html .= '</li>';
         }
 
-        $html .= '</ul></section>';
+        $html .= '</ul>';
+
+        if ( $has_preview ) {
+            $html .= '<div class="dges-detail-viewer" data-dges-viewer hidden></div>';
+        }
+
+        $html .= '</section>';
 
         return $html;
+    }
+
+    private static function is_pdf_file( $file ) {
+        if ( ! empty( $file['type'] ) && 'PDF' === strtoupper( (string) $file['type'] ) ) {
+            return true;
+        }
+
+        $filename = ! empty( $file['filename'] ) ? (string) $file['filename'] : '';
+
+        return '' !== $filename && 'pdf' === strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) );
     }
 
     private static function detail_related( $item ) {
@@ -844,7 +917,7 @@ class DGES_Docs_Render {
 
             $items .= '<li class="dges-related-item">';
             $items .= '<a class="dges-related-link" href="' . esc_url( $rel_url ) . '">';
-            $items .= self::file_icon();
+            $items .= self::document_icon();
             $items .= '<span class="dges-related-info">';
             $items .= '<span class="dges-related-title">' . esc_html( $rel_title ) . '</span>';
 

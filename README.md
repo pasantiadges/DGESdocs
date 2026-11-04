@@ -14,9 +14,9 @@ Implementado en esta rama:
 - Índice local cacheado con lock, *stale-while-revalidate* y cron horario.
 - Modo API preparado para cuando el backend implemente `txtbusqueda`, `categoria`, `offset` y `total`.
 - Panel de administración con URL de la API, modo de búsqueda, base de archivos, cantidades y estado del índice.
-- Cards con tipo de documento, año, número, categoría, “Destacado” y “No vigente”.
+- Cards con categoría principal, fecha, descripción y botón; las destacadas llevan borde amarillo y “No vigente” cuando corresponde.
 - Card individual `[dges_documento id="…"]` breve, con insignia, título, una línea de descripción y botón de acción.
-- Ruta de detalle `/documentos/documento/{id}/` (y fallback `?doc={id}`) con archivos, relacionados, breadcrumb, SEO y 404.
+- Ruta de detalle `/documentos/documento/{id}/` (y fallback `?doc={id}`) con ficha lateral, archivos (vista previa/descarga), relacionados, breadcrumb, SEO y 404.
 - Página de detalle autocreada y configurable; página del listado para el breadcrumb/volver.
 
 Pendiente (Fase 3):
